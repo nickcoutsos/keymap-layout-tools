@@ -5,7 +5,9 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode development",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "deploy": "gh-pages -d dist",
+    "predeploy": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -38,6 +40,7 @@
     "eslint": "^8.34.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-config-standard": "^17.0.0",
+    "gh-pages": "^5.0.0",
     "html-webpack-plugin": "^5.5.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.75.0",
