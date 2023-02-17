@@ -1,0 +1,4 @@
+{
+  "extends": ["standard", "react-app"],
+  "root": true
+}

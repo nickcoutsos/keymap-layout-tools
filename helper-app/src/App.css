@@ -1,0 +1,50 @@
+:root {
+  --bg: white;
+  --fg: black;
+ --link: royalblue;
+  --link-hover: #6d99c6;
+  --key-bg-base: #f2f2f2;
+  --key-color-base: #6f6f6f;
+  --key-color-extreme: #313131;
+  --code-bg: rgba(0, 0, 0, 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    color-scheme: dark;
+    --code-bg: rgba(255, 255, 255, 0.1);
+    --bg: #123;
+    --bg-rgb: 17,34,51;
+    --fg: white;
+    --key-bg-base: #1c2c3b;
+    --key-color-base: #b7b7b7;
+    --key-color-extreme: #e7e7e7;
+  }
+}
+
+html, body {
+  width: 100vw;
+	height: 100vh;
+	overflow: auto;
+	padding: 0;
+	margin: 0;
+
+  font-family: sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+code {
+  background-color: var(--code-bg);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+pre {
+  background-color: var(--code-bg);
+  padding: 15px;
+  border-radius: 3px;
+}
+
+textarea {
+  white-space: pre;
+}

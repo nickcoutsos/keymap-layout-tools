@@ -1,0 +1,49 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  padding: 15px;
+}
+
+.error {
+  color: red;
+}
+
+.layout {
+  position: relative;
+  transform-origin: 0;
+}
+
+.placer {
+  position: absolute;
+}
+.placer > * {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.key {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: monospace;
+  font-size: 150%;
+  border-radius: 5px;
+  color: var(--key-color-base);
+  background-color: var(--key-bg-base);
+}
+
+.debugKeyRotation:after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  bottom: 0;
+  width: 0px;
+  height: 300px;
+
+  transform: translate(0, 100%);
+  border: 2px dashed var(--key-bg-base);
+  opacity: 0.8;
+}
