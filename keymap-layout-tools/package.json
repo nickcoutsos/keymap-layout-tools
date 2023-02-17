@@ -2,6 +2,7 @@
   "name": "keymap-layout-tools",
   "version": "1.0.0",
   "description": "",
+  "license": "MIT",
   "scripts": {
     "lint": "eslint lib/"
   },
