@@ -4,7 +4,7 @@ import KeyPlacer from './KeyPlacer.jsx'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './styles.module.css'
 
-function KeyboardLayout(props) {
+function KeyboardLayout (props) {
   const { layout, renderKey, scale } = props
 
   return (

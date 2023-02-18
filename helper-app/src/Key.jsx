@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import styles from './styles.module.css'
 
-function Key({ index, keyLayout }) {
+function Key ({ index, keyLayout }) {
   const classes = [
     styles.key,
     'r' in keyLayout ? styles.debugKeyRotation : ''

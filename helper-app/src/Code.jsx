@@ -14,7 +14,7 @@ export default function Code ({ value, onChange }) {
     } catch (err) {
       setError(err)
     }
-  }, [setPending, setError, onchange])
+  }, [setPending, setError, onChange])
 
   return (
     <>
