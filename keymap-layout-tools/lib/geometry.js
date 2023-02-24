@@ -9,8 +9,8 @@ export function getComputedParams (position, size, rotation = {}) {
     y: position.y * (DEFAULT_SIZE + DEFAULT_PADDING),
     u: size.u * DEFAULT_SIZE + DEFAULT_PADDING * (size.u - 1),
     h: size.h * DEFAULT_SIZE + DEFAULT_PADDING * (size.h - 1),
-    rx: (position.x - (rotation.x || position.x)) * -(DEFAULT_SIZE + DEFAULT_PADDING),
-    ry: (position.y - (rotation.y || position.y)) * -(DEFAULT_SIZE + DEFAULT_PADDING),
+    rx: (position.x - (rotation.x ?? position.x)) * -(DEFAULT_SIZE + DEFAULT_PADDING),
+    ry: (position.y - (rotation.y ?? position.y)) * -(DEFAULT_SIZE + DEFAULT_PADDING),
     a: rotation.a || 0
   }
 }
