@@ -1,20 +1,32 @@
 import { useCallback, useState } from 'react'
+import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
+
 import styles from './styles.module.css'
 
 export default function Code ({ value, onChange }) {
   const [pending, setPending] = useState(value)
-  const [error, setError] = useState(false)
+  const [errors, setErrors] = useState(false)
 
   const handleChange = useCallback(event => {
     const { value } = event.target
     setPending(value)
     try {
-      onChange(JSON.parse(value))
-      setError(null)
+      const layout = JSON.parse(value)
+      const metadata = Array.isArray(layout)
+        ? { layouts: { default: { layout } } }
+        : layout
+
+      validateInfoJson(metadata)
+      onChange(layout)
+      setErrors(null)
     } catch (err) {
-      setError(err)
+      setErrors(
+        err instanceof InfoValidationError
+          ? err.errors
+          : [err.toString()]
+      )
     }
-  }, [setPending, setError, onChange])
+  }, [setPending, setErrors, onChange])
 
   return (
     <>
@@ -24,9 +36,15 @@ export default function Code ({ value, onChange }) {
         cols={80}
         rows={20}
       />
-      {error && (
+      {errors && (
         <p className={styles.error}>
-          {error.toString()}
+          <ul>
+            {errors.map((error, i) => (
+              <li key={i}>
+                {error}
+              </li>
+            ))}
+          </ul>
         </p>
       )}
     </>

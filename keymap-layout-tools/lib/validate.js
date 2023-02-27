@@ -53,7 +53,7 @@ function validateInfoJson (info) {
             }
             for (const prop of ['row', 'col']) {
               if (anyKeyHasPosition && !(prop in key)) {
-                errors.push(`Key definition at ${keyPath} is missing "${prop}"`)
+                errors.push(`Key definition at ${keyPath} is missing property "${prop}"`)
               } else if (prop in key && (!Number.isInteger(key[prop]) || key[prop] < 0)) {
                 errors.push(`Key definition at ${keyPath} "${prop}" must be a non-negative integer`)
               }
