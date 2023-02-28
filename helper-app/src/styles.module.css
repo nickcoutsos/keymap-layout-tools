@@ -34,16 +34,35 @@
   color: var(--key-color-base);
   background-color: var(--key-bg-base);
 }
+.transformedGhost {
+  opacity: 0.3;
+  border: 2px dashed royalblue;
+  pointer-events: none;
+}
 
-.debugKeyRotation:after {
-  content: '';
-  display: inline-block;
+.rotationOriginHelper {
   position: absolute;
-  bottom: 0;
+  pointer-events: none;
+  color: royalblue;
+}
+.originMarker {
+  position: absolute;
+}
+.originMarker p {
+  white-space: pre;
+  margin: 3px;
+}
+.originMarker::before {
+  content: '+';
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 200%;
+  color: var(--key-color-extreme);
+}
+.rotationMarker {
   width: 0px;
-  height: 300px;
-
-  transform: translate(0, 100%);
-  border: 2px dashed var(--key-bg-base);
-  opacity: 0.8;
+  border: 2px dashed royalblue;
+  box-sizing: border-box;
+  border-radius: 2.5px;
+  transform-origin: top;
 }

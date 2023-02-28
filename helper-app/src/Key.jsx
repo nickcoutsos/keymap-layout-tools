@@ -1,11 +1,8 @@
 import PropTypes from 'prop-types'
 import styles from './styles.module.css'
 
-function Key ({ index, keyLayout }) {
-  const classes = [
-    styles.key,
-    'r' in keyLayout ? styles.debugKeyRotation : ''
-  ].join(' ')
+function Key ({ index, className = '' }) {
+  const classes = [styles.key, className].join(' ')
 
   return (
     <div className={classes}>
