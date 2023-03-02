@@ -5,6 +5,14 @@
   padding: 15px;
 }
 
+.zoom {
+  font-size: 60%;
+  font-weight: normal;
+}
+.zoom input {
+  vertical-align: middle;
+}
+
 .error {
   color: tomato;
 }

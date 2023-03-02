@@ -36,8 +36,23 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
 
 export default function App () {
   const [layout, setLayout] = useState(corneLayout)
-  const wrapperStyle = useMemo(() => getWrapperStyle(layout), [layout])
+  const [scale, setScale] = useState(0.7)
   const labels = useMemo(() => layout.map((_, i) => i.toString()), [layout])
+  const wrapperStyle = useMemo(
+    () => getWrapperStyle(layout, { scale }),
+    [layout, scale]
+  )
+
+  const zoom = (
+    <input
+      type="range"
+      onChange={e => setScale(Number(e.target.value))}
+      value={scale}
+      min="0.2"
+      max="1.5"
+      step="0.1"
+    />
+  )
 
   return (
     <div className={styles.container}>
@@ -60,7 +75,9 @@ export default function App () {
         </p>
         <pre>{renderLayout(layout, labels)}</pre>
 
-        <h2>Graphical Rendering</h2>
+        <h2>
+          Graphical Rendering <span className={styles.zoom}>(Zoom: {scale.toFixed(1)}x {zoom})</span>
+        </h2>
         <p>
           <em>
             Applications will visualize your keymap in this format. It is layed
@@ -71,6 +88,7 @@ export default function App () {
           <KeyboardLayout
             layout={layout}
             renderKey={Key}
+            scale={scale}
           />
         </div>
       </div>

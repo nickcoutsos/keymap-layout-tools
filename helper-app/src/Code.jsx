@@ -85,7 +85,6 @@ export default function Code ({ value, onChange }) {
   }, [setState])
 
   const handleSelectLayout = useCallback(event => {
-    console.log(event.target.value)
     setState(state => ({ ...state, selectedLayout: event.target.value }))
   }, [setState])
 
@@ -105,8 +104,8 @@ export default function Code ({ value, onChange }) {
       <textarea
         value={text}
         onChange={handleEdit}
-        cols={80}
-        rows={20}
+        cols={60}
+        rows={30}
       />
       {errors.length > 1 && (
         <div className={styles.error}>
