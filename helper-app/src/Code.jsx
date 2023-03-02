@@ -1,43 +1,115 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
 
+import { formatJson, jsonTable } from './formatter'
 import styles from './styles.module.css'
 
-export default function Code ({ value, onChange }) {
-  const [pending, setPending] = useState(value)
-  const [errors, setErrors] = useState(false)
+function formatMetadata (metadata) {
+  return formatJson(metadata, [{
+    match: (key, value) => Array.isArray(value),
+    serialize: value => jsonTable(value)
+  }], 2)
+}
 
-  const handleChange = useCallback(event => {
+function isRawLayout (data) {
+  return Array.isArray(data)
+}
+
+export default function Code ({ value, onChange }) {
+  const [{ text, errors, parsed, selectedLayout }, setState] = useState({
+    text: value,
+    errors: [],
+    parsed: JSON.parse(value),
+    selectedLayout: ''
+  })
+
+  const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts)
+
+  const handleEdit = useCallback(event => {
     const { value } = event.target
-    setPending(value)
+
     try {
-      const layout = JSON.parse(value)
-      const metadata = Array.isArray(layout)
-        ? { layouts: { default: { layout } } }
-        : layout
+      const parsed = JSON.parse(value)
+      const metadata = isRawLayout(parsed)
+        ? { layouts: { default: { layout: parsed } } }
+        : parsed
 
       validateInfoJson(metadata)
-      onChange(layout)
-      setErrors(null)
+
+      setState(state => ({
+        ...state,
+        text: value,
+        errors: [],
+        parsed
+      }))
     } catch (err) {
-      setErrors(
-        err instanceof InfoValidationError
-          ? err.errors
-          : [err.toString()]
-      )
+      const errors = err instanceof InfoValidationError
+        ? err.errors
+        : [err.toString()]
+
+      setState(state => ({ ...state, text: value, errors }))
     }
-  }, [setPending, setErrors, onChange])
+  }, [setState])
+
+  useEffect(() => {
+    const metadata = isRawLayout(parsed)
+      ? { layouts: { default: { layout: parsed } } }
+      : parsed
+
+    onChange(
+      metadata.layouts[selectedLayout]?.layout ||
+      Object.values(metadata.layouts)[0].layout
+    )
+  }, [parsed, selectedLayout, onChange])
+
+  const handleFormat = useCallback(() => {
+    setState(state => ({ ...state, text: formatMetadata(state.parsed) }))
+  }, [setState])
+
+  const handleGenerateMetadata = useCallback(() => {
+    setState(state => {
+      if (!isRawLayout(state.parsed)) {
+        return state
+      }
+
+      const parsed = {
+        layouts: {
+          default: {
+            layout: state.parsed
+          }
+        }
+      }
+
+      return { ...state, parsed, text: formatMetadata(parsed) }
+    })
+  }, [setState])
+
+  const handleSelectLayout = useCallback(event => {
+    console.log(event.target.value)
+    setState(state => ({ ...state, selectedLayout: event.target.value }))
+  }, [setState])
 
   return (
     <>
+      <p style={{ display: 'flex', gap: '4px' }}>
+        <button onClick={handleFormat}>Format</button>
+        {isRawLayout(parsed) && <button onClick={handleGenerateMetadata}>Generate metadata</button>}
+        {layouts.length > 0 && (
+          <select value={selectedLayout} onChange={handleSelectLayout}>
+            {layouts.map((name, i) => (
+              <option key={i} value={name}>{name}</option>
+            ))}
+          </select>
+        )}
+      </p>
       <textarea
-        value={pending}
-        onChange={handleChange}
+        value={text}
+        onChange={handleEdit}
         cols={80}
         rows={20}
       />
-      {errors && (
-        <p className={styles.error}>
+      {errors.length > 1 && (
+        <div className={styles.error}>
           <ul>
             {errors.map((error, i) => (
               <li key={i}>
@@ -45,7 +117,7 @@ export default function Code ({ value, onChange }) {
               </li>
             ))}
           </ul>
-        </p>
+        </div>
       )}
     </>
   )
