@@ -93,7 +93,7 @@ export default function Code ({ value, onChange }) {
       <p style={{ display: 'flex', gap: '4px' }}>
         <button onClick={handleFormat}>Format</button>
         {isRawLayout(parsed) && <button onClick={handleGenerateMetadata}>Generate metadata</button>}
-        {layouts.length > 0 && (
+        {layouts.length > 1 && (
           <select value={selectedLayout} onChange={handleSelectLayout}>
             {layouts.map((name, i) => (
               <option key={i} value={name}>{name}</option>
@@ -107,7 +107,7 @@ export default function Code ({ value, onChange }) {
         cols={60}
         rows={30}
       />
-      {errors.length > 1 && (
+      {errors.length > 0 && (
         <div className={styles.error}>
           <ul>
             {errors.map((error, i) => (

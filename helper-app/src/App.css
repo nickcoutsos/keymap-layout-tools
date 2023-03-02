@@ -33,10 +33,11 @@ html, body {
   color: var(--fg);
 }
 
-code {
+code, textarea {
   background-color: var(--code-bg);
   padding: 0 3px;
-  border-radius: 3px;
+  border: none;
+  border-radius: 4px;
 }
 
 pre {
@@ -47,4 +48,5 @@ pre {
 
 textarea {
   white-space: pre;
+  padding: 5px;
 }
