@@ -1,35 +1,36 @@
 import { useCallback, useEffect, useState } from 'react'
 import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
 
-import { formatJson, jsonTable } from './formatter'
+import {
+  formatMetadata,
+  isKleLayout,
+  isRawLayout,
+  parseKleLayout
+} from './util'
 import styles from './styles.module.css'
 
-function formatMetadata (metadata) {
-  return formatJson(metadata, [{
-    match: (key, value) => Array.isArray(value),
-    serialize: value => jsonTable(value)
-  }], 2)
-}
-
-function isRawLayout (data) {
-  return Array.isArray(data)
-}
-
 export default function Code ({ value, onChange }) {
-  const [{ text, errors, parsed, selectedLayout }, setState] = useState({
+  const [{ text, errors, parsed, selectedLayout, kle }, setState] = useState({
     text: value,
     errors: [],
     parsed: JSON.parse(value),
     selectedLayout: ''
   })
 
-  const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts)
+  const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
 
   const handleEdit = useCallback(event => {
-    const { value } = event.target
+    const { value: text } = event.target
 
     try {
-      const parsed = JSON.parse(value)
+      const parsed = JSON.parse(text)
+      const kle = isKleLayout(parsed)
+
+      if (kle) {
+        setState(state => ({ ...state, text, errors: [], kle: true }))
+        return
+      }
+
       const metadata = isRawLayout(parsed)
         ? { layouts: { default: { layout: parsed } } }
         : parsed
@@ -38,7 +39,7 @@ export default function Code ({ value, onChange }) {
 
       setState(state => ({
         ...state,
-        text: value,
+        text,
         errors: [],
         parsed
       }))
@@ -47,7 +48,7 @@ export default function Code ({ value, onChange }) {
         ? err.errors
         : [err.toString()]
 
-      setState(state => ({ ...state, text: value, errors }))
+      setState(state => ({ ...state, text, errors }))
     }
   }, [setState])
 
@@ -88,11 +89,23 @@ export default function Code ({ value, onChange }) {
     setState(state => ({ ...state, selectedLayout: event.target.value }))
   }, [setState])
 
+  const handleImportKle = useCallback(() => {
+    setState(state => {
+      const parsed = parseKleLayout(JSON.parse(state.text))
+      const text = formatMetadata(parsed)
+      return { ...state, parsed, text, kle: false }
+    })
+  }, [setState])
+
   return (
     <>
-      <p style={{ display: 'flex', gap: '4px' }}>
+      <div className={styles.actions}>
         <button onClick={handleFormat}>Format</button>
-        {isRawLayout(parsed) && <button onClick={handleGenerateMetadata}>Generate metadata</button>}
+        {isRawLayout(parsed) && (
+          <button onClick={handleGenerateMetadata}>
+            Generate metadata
+          </button>
+        )}
         {layouts.length > 1 && (
           <select value={selectedLayout} onChange={handleSelectLayout}>
             {layouts.map((name, i) => (
@@ -100,7 +113,12 @@ export default function Code ({ value, onChange }) {
             ))}
           </select>
         )}
-      </p>
+        {kle && (
+          <button onClick={handleImportKle} className={styles.kleImport}>
+            Import KLE Layout
+          </button>
+        )}
+      </div>
       <textarea
         value={text}
         onChange={handleEdit}
