@@ -34,7 +34,7 @@ function Arc ({ start, angle }) {
   )
   const radii = [r, r]
   const end = rotatePoint(start, [0, 0], angle)
-  const width = 2
+  const width = 4
 
   const size = r + width / 2
   const sweep = angle < 0 ? 0 : 1
@@ -102,7 +102,7 @@ export default function RotationOriginHelper ({ keyLayout }) {
         </div>
         <div className={styles.rotationMarker} style={{
           height: `${hyp}px`,
-          transform: `rotate(${-90 + startAngle}deg)`
+          transform: `translate(-50%) rotate(${-90 + startAngle}deg)`
         }} />
         <Arc
           start={[delta[0] - 2.5, delta[1] - 2.5]}

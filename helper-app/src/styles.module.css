@@ -45,6 +45,7 @@
 .transformedGhost {
   opacity: 0.3;
   border: 2px dashed royalblue;
+  box-sizing: border-box;
   pointer-events: none;
 }
 
