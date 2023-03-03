@@ -4,7 +4,7 @@ import { getKeyBoundingBox } from 'keymap-layout-tools/lib/geometry'
 import renderLayout from 'keymap-layout-tools/lib/render'
 
 import './App.css'
-import Code from './Code.jsx'
+import Code from './Code/Code.jsx'
 import KeyboardLayout from './KeyboardLayout.jsx'
 import Key from './Key.jsx'
 import corneLayout from './corne-layout.json'
@@ -73,7 +73,13 @@ export default function App () {
             and the key ordering of your layout.
           </em>
         </p>
-        <pre>{renderLayout(layout, labels)}</pre>
+        <pre>
+          {(
+            layout.every(key => 'row' in key && 'col' in key)
+              ? renderLayout(layout, labels)
+              : ' -- Missing `row`/`col` attributes from layout --'
+          )}
+        </pre>
 
         <h2>
           Graphical Rendering <span className={styles.zoom}>(Zoom: {scale.toFixed(1)}x {zoom})</span>

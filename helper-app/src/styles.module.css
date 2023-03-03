@@ -13,10 +13,6 @@
   vertical-align: middle;
 }
 
-.error {
-  color: tomato;
-}
-
 .layout {
   position: relative;
   transform-origin: 0;
