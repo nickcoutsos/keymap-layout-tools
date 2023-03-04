@@ -49,4 +49,5 @@ pre {
 textarea {
   white-space: pre;
   padding: 5px;
+  overflow: clip;
 }
