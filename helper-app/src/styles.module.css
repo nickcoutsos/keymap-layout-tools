@@ -37,14 +37,20 @@
   border-radius: 5px;
   color: var(--key-color-base);
   background-color: var(--key-bg-base);
+  cursor: default;
 }
 .transformedGhost {
-  opacity: 0.3;
+  opacity: 0.6;
   border: 2px dashed royalblue;
   box-sizing: border-box;
   pointer-events: none;
 }
-
+.transformed {
+  opacity: 0.3;
+  background-color: royalblue;
+  box-sizing: border-box;
+  pointer-events: none;
+}
 .rotationOriginHelper {
   position: absolute;
   pointer-events: none;

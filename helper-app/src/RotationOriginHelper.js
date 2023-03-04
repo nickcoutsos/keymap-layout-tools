@@ -96,6 +96,9 @@ export default function RotationOriginHelper ({ keyLayout }) {
 
   return (
     <div className={styles.rotationOriginHelper}>
+      <KeyPlacer keyLayout={omit(keyLayout, 'r')}>
+        <Key index="" className={styles.transformedGhost} />
+      </KeyPlacer>
       <div style={{ position: 'absolute', ...positionStyle }}>
         <div className={styles.originMarker}>
           <p>({position.x}, {position.y})</p>
@@ -109,8 +112,8 @@ export default function RotationOriginHelper ({ keyLayout }) {
           angle={angle}
         />
       </div>
-      <KeyPlacer keyLayout={omit(keyLayout, 'r')}>
-        <Key index="" className={styles.transformedGhost} />
+      <KeyPlacer keyLayout={keyLayout}>
+        <Key index="" className={styles.transformed} />
       </KeyPlacer>
     </div>
   )
