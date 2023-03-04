@@ -20,7 +20,8 @@ export function isKleLayout (data) {
     data.every(item => (
       typeof item === 'string' ||
       typeof item === 'object'
-    ))
+    )) &&
+    data.some(item => typeof item === 'string')
   )
 }
 
