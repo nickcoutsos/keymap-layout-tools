@@ -23,7 +23,11 @@ export function isRawLayout (data) {
 
 export function parseKleLayout (data) {
   const keyLayouts = []
-  const current = { x: 0, y: 0, u: 1, h: 1, r: 0 }
+  const current = { x: 0, y: 0, u: 1, h: 1, r: 0, ry: 0 }
+
+  if (!Array.isArray(data[0])) {
+    data.shift()
+  }
 
   for (const row of data) {
     for (const obj of row) {
