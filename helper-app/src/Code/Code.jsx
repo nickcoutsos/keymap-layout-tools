@@ -35,9 +35,7 @@ export default function Code ({ value, onChange }) {
     return () => darkModePreference.removeEventListener('change', handleChange)
   })
 
-  const handleEdit = useCallback(event => {
-    const { value: text } = event.target
-
+  const handleEdit = useCallback(text => {
     try {
       const parsed = JSON.parse(text)
       const kle = isKleLayout(parsed)
