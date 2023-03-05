@@ -33,7 +33,12 @@ html, body {
   color: var(--fg);
 }
 
-code, textarea {
+#app-root {
+  height: 100vh;
+  padding: 0;
+}
+
+code {
   background-color: var(--code-bg);
   padding: 0 3px;
   border: none;
@@ -44,10 +49,4 @@ pre {
   background-color: var(--code-bg);
   padding: 15px;
   border-radius: 3px;
-}
-
-textarea {
-  white-space: pre;
-  padding: 5px;
-  overflow: clip;
 }

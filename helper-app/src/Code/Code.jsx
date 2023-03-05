@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
+import CodeMirror from '@uiw/react-codemirror'
+import { json } from '@codemirror/lang-json'
 
 import {
   formatMetadata,
@@ -9,7 +11,11 @@ import {
 } from './util'
 import styles from './styles.module.css'
 
+const jsonExtension = json()
+const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
+
 export default function Code ({ value, onChange }) {
+  const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
   const [{ text, errors, parsed, selectedLayout, kle }, setState] = useState({
     text: value,
     errors: [],
@@ -18,6 +24,16 @@ export default function Code ({ value, onChange }) {
   })
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
+
+  useEffect(() => {
+    const handleChange = e => {
+      console.log(e)
+      setTheme(e.matches ? 'dark' : 'light')
+    }
+
+    darkModePreference.addEventListener('change', handleChange)
+    return () => darkModePreference.removeEventListener('change', handleChange)
+  })
 
   const handleEdit = useCallback(event => {
     const { value: text } = event.target
@@ -97,6 +113,8 @@ export default function Code ({ value, onChange }) {
     })
   }, [setState])
 
+  console.log(text)
+
   return (
     <>
       <div className={styles.actions}>
@@ -119,11 +137,13 @@ export default function Code ({ value, onChange }) {
           </button>
         )}
       </div>
-      <textarea
+      <CodeMirror
         value={text}
+        style={{ overflow: 'auto' }}
+        theme={theme}
+        width="460px"
         onChange={handleEdit}
-        cols={60}
-        rows={30}
+        extensions={[jsonExtension]}
       />
       {errors.length > 0 && (
         <div className={styles.error}>

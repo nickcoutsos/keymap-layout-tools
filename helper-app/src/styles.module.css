@@ -2,7 +2,13 @@
   display: flex;
   flex-direction: row;
   gap: 15px;
+  height: 100vh;
+}
+
+.code {
+  display: flex;
   padding: 15px;
+  flex-direction: column;
 }
 
 .zoom {

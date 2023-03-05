@@ -25,6 +25,8 @@
     ]
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
+    "@uiw/react-codemirror": "^4.19.9",
     "keymap-layout-tools": "file:../keymap-layout-tools",
     "lodash": "^4.17.21",
     "prop-types": "^15.8.1",
