@@ -111,8 +111,6 @@ export default function Code ({ value, onChange }) {
     })
   }, [setState])
 
-  console.log(text)
-
   return (
     <>
       <div className={styles.actions}>
