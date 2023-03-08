@@ -101,7 +101,7 @@ export default function RotationOriginHelper ({ keyLayout }) {
       </KeyPlacer>
       <div style={{ position: 'absolute', ...positionStyle }}>
         <div className={styles.originMarker}>
-          <p>({position.x}, {position.y})</p>
+          <p>({rotation.x}, {rotation.y})</p>
         </div>
         <div className={styles.rotationMarker} style={{
           height: `${hyp}px`,
