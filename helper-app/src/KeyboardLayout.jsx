@@ -19,7 +19,7 @@ function matchRotations (keyA, keyB) {
 function KeyboardLayout (props) {
   const { layout, renderKey, scale } = props
   const [hovering, setHovering] = useState(null)
-  const rotating = hovering && !!layout[hovering].r && (
+  const rotating = hovering !== null && !!layout[hovering].r && (
     layout.reduce((acc, keyLayout, index) => {
       if (matchRotations(keyLayout, layout[hovering])) {
         acc.push({ index, keyLayout })
