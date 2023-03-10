@@ -3,8 +3,8 @@ import pick from 'lodash/pick'
 import { getComputedParams } from 'keymap-layout-tools/lib/geometry'
 
 import Arc from './Arc.jsx'
-import KeyPlacer from './KeyPlacer.jsx'
-import Key from './Key.jsx'
+import KeyPlacer from '../KeyPlacer.jsx'
+import Key from '../Key.jsx'
 import styles from './styles.module.css'
 
 const getPosition = keyLayout => pick(keyLayout, ['x', 'y'])

@@ -1,11 +1,10 @@
-import filter from 'lodash/filter'
 import isEqual from 'lodash/isEqual'
 import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 
 import KeyPlacer from './KeyPlacer.jsx'
-import RotationOriginHelper from './RotationOriginHelper.js'
+import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './styles.module.css'
 
