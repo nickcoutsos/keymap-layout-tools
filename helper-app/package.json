@@ -6,7 +6,7 @@
     "start": "webpack serve --mode development",
     "build": "webpack --mode development",
     "lint": "eslint --ext js,jsx src/",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist -m \"$(git log -1 --pretty=%B)\"",
     "predeploy": "npm run build"
   },
   "keywords": [],

@@ -2,6 +2,7 @@ import omit from 'lodash/omit'
 import pick from 'lodash/pick'
 import { getComputedParams } from 'keymap-layout-tools/lib/geometry'
 
+import Arc from './Arc.jsx'
 import KeyPlacer from './KeyPlacer.jsx'
 import Key from './Key.jsx'
 import styles from './styles.module.css'
@@ -16,63 +17,7 @@ const getSize = keyLayout => {
   return { u, h }
 }
 
-function rotatePoint (point, origin, degrees) {
-  const radians = Math.PI * degrees / 180
-  const x = point[0] - origin[0]
-  const y = point[1] - origin[1]
-
-  return [
-    origin[0] + x * Math.cos(radians) - y * Math.sin(radians),
-    origin[1] + y * Math.cos(radians) + x * Math.sin(radians)
-  ]
-}
-
-function Arc ({ start, angle }) {
-  const r = Math.sqrt(
-    Math.pow(start[0], 2) +
-    Math.pow(start[1], 2)
-  )
-  const radii = [r, r]
-  const end = rotatePoint(start, [0, 0], angle)
-  const width = 4
-
-  const size = r + width / 2
-  const sweep = angle < 0 ? 0 : 1
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${r * 2 + width}px`}
-      height={`${r * 2 + width}px`}
-      viewBox={`${-size} ${-size} ${size * 2} ${size * 2}`}
-      style={{
-        position: 'absolute',
-        top: '0px',
-        stroke: 'royalblue',
-        strokeDasharray: 5,
-        strokeWidth: width,
-        fill: 'none',
-        display: 'block',
-        width: `${size * 2}px`,
-        height: `${size * 2}px`,
-        pointerEvents: 'none',
-        transformOrigin: '50% 50%',
-        transform: `translate(-50%, -50%) rotate(${-180}deg)`
-      }}
-    >
-      <path
-        d={`
-          M ${start.join(' ')}
-          A ${radii.join(' ')}
-            0 0 ${sweep}
-            ${end.join(' ')}
-        `}
-      />
-    </svg>
-  )
-}
-
-export default function RotationOriginHelper ({ keyLayout }) {
+export default function RotationOriginHelper ({ showArc, keyLayout }) {
   const position = getPosition(keyLayout)
   const rotation = getRotation(keyLayout)
   const size = getSize(keyLayout)
@@ -99,22 +44,26 @@ export default function RotationOriginHelper ({ keyLayout }) {
       <KeyPlacer keyLayout={omit(keyLayout, 'r')}>
         <Key index="" className={styles.transformedGhost} />
       </KeyPlacer>
-      <div style={{ position: 'absolute', ...positionStyle }}>
-        <div className={styles.originMarker}>
-          <p>({rotation.x}, {rotation.y})</p>
-        </div>
-        <div className={styles.rotationMarker} style={{
-          height: `${hyp}px`,
-          transform: `translate(-50%) rotate(${-90 + startAngle}deg)`
-        }} />
-        <Arc
-          start={[delta[0] - 2.5, delta[1] - 2.5]}
-          angle={angle}
-        />
-      </div>
-      <KeyPlacer keyLayout={keyLayout}>
-        <Key index="" className={styles.transformed} />
-      </KeyPlacer>
+      {showArc && (
+        <>
+          <div style={{ position: 'absolute', ...positionStyle }}>
+            <div className={styles.originMarker}>
+              <p>({rotation.x}, {rotation.y})</p>
+            </div>
+            <div className={styles.rotationMarker} style={{
+              height: `${hyp}px`,
+              transform: `translate(-50%) rotate(${-90 + startAngle}deg)`
+            }} />
+            <Arc
+              start={[delta[0] - 2.5, delta[1] - 2.5]}
+              angle={angle}
+            />
+          </div>
+          <KeyPlacer keyLayout={keyLayout}>
+            <Key index="" className={styles.transformed} />
+          </KeyPlacer>
+        </>
+      )}
     </div>
   )
 }

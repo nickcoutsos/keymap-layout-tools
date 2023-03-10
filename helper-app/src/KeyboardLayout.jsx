@@ -1,3 +1,6 @@
+import filter from 'lodash/filter'
+import isEqual from 'lodash/isEqual'
+import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 
@@ -6,9 +9,25 @@ import RotationOriginHelper from './RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './styles.module.css'
 
+function matchRotations (keyA, keyB) {
+  return isEqual(
+    pick(keyA, ['r', 'rx', 'ry']),
+    pick(keyB, ['r', 'rx', 'ry'])
+  )
+}
+
 function KeyboardLayout (props) {
   const { layout, renderKey, scale } = props
   const [hovering, setHovering] = useState(null)
+  const rotating = hovering && layout[hovering].r && (
+    layout.reduce((acc, keyLayout, index) => {
+      if (matchRotations(keyLayout, layout[hovering])) {
+        acc.push({ index, keyLayout })
+      }
+
+      return acc
+    }, [])
+  )
 
   return (
     <div className={styles.layout} style={{ transform: `scale(${scale})` }}>
@@ -23,9 +42,16 @@ function KeyboardLayout (props) {
           {renderKey({ index, keyLayout })}
         </KeyPlacer>
       ))}
-      {hovering != null && !!layout[hovering].r && (
+      {/* {hovering != null && !!layout[hovering].r && (
         <RotationOriginHelper keyLayout={layout[hovering]} />
-      )}
+      )} */}
+      {rotating && rotating.map(({ index, keyLayout }) => (
+        <RotationOriginHelper
+          key={index}
+          showArc={index === hovering}
+          keyLayout={keyLayout}
+        />
+      ))}
     </div>
   )
 }
