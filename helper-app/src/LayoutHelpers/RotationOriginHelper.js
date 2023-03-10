@@ -1,21 +1,11 @@
 import omit from 'lodash/omit'
-import pick from 'lodash/pick'
 import { getComputedParams } from 'keymap-layout-tools/lib/geometry'
 
 import Arc from './Arc.jsx'
+import { getPosition, getRotation, getSize } from './selectors.js'
 import KeyPlacer from '../KeyPlacer.jsx'
 import Key from '../Key.jsx'
 import styles from './styles.module.css'
-
-const getPosition = keyLayout => pick(keyLayout, ['x', 'y'])
-const getRotation = keyLayout => {
-  const { rx, ry, r } = keyLayout
-  return { x: rx, y: ry, a: r }
-}
-const getSize = keyLayout => {
-  const { w = 1, u = w, h = 1 } = keyLayout
-  return { u, h }
-}
 
 export default function RotationOriginHelper ({ showArc, keyLayout }) {
   const position = getPosition(keyLayout)

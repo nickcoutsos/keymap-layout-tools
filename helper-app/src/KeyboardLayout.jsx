@@ -7,6 +7,7 @@ import KeyPlacer from './KeyPlacer.jsx'
 import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './styles.module.css'
+import PositionHelper from './LayoutHelpers/PositionHelper.jsx'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -41,6 +42,9 @@ function KeyboardLayout (props) {
           {renderKey({ index, keyLayout })}
         </KeyPlacer>
       ))}
+      {hovering !== null && (
+        <PositionHelper keyLayout={layout[hovering]} />
+      )}
       {rotating && rotating.map(({ index, keyLayout }) => (
         <RotationOriginHelper
           key={index}

@@ -17,6 +17,7 @@
 }
 .originMarker {
   position: absolute;
+  pointer-events: none;
 }
 .originMarker p {
   white-space: pre;
