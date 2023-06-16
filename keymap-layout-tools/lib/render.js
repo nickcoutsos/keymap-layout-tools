@@ -1,6 +1,6 @@
-const times = require('lodash/times')
+import times from 'lodash/times.js'
 
-function renderLayout (layout, layer, opts = {}) {
+export default function renderLayout (layout, layer, opts = {}) {
   const { margin = 2 } = opts
   const table = layer.reduce((map, code, i) => {
     // TODO: this would be better as a loop over `layout`, checking for a
@@ -36,5 +36,3 @@ function renderLayout (layout, layer, opts = {}) {
     }).join('').replace(/\s+$/, '')
   }).join('\n')
 }
-
-module.exports = renderLayout

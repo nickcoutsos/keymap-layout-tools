@@ -1,6 +1,6 @@
-const isNumber = require('lodash/isNumber')
+import isNumber from 'lodash/isNumber.js'
 
-class InfoValidationError extends Error {
+export class InfoValidationError extends Error {
   constructor (errors) {
     super()
     this.name = 'InfoValidationError'
@@ -8,7 +8,7 @@ class InfoValidationError extends Error {
   }
 }
 
-function validateInfoJson (info) {
+export function validateInfoJson (info) {
   const errors = []
 
   if (typeof info !== 'object' || info === null) {

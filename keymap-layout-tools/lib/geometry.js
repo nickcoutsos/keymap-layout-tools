@@ -1,4 +1,4 @@
-import map from 'lodash/map'
+import map from 'lodash/map.js'
 
 const DEFAULT_SIZE = 70
 const DEFAULT_PADDING = 5

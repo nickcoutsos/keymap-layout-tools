@@ -1,0 +1,13 @@
+{
+  "name": "kicad-to-layout",
+  "version": "1.0.0",
+  "description": "Parse a keyboard's `.kicad_pcb` file into a graphical layout",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "keymap-layout-tools": "file:../keymap-layout-tools",
+    "kicad-utils": "^0.2.1"
+  }
+}
