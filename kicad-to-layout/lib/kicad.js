@@ -2,7 +2,7 @@
  * Parse switches from a `kicad_pcb` file to generate a layout.
  * Inspired by https://gist.github.com/crides/6d12d1033368e24873b0142941311e5d
  */
-import { Pcb, MIL2MM } from 'kicad-utils'
+import Parse from 's-expression'
 
 /**
  * @typedef {Object} LayoutKey
@@ -32,21 +32,36 @@ import { Pcb, MIL2MM } from 'kicad-utils'
  * @returns {Array<ParsedSwitch>}
  */
 export function getSwitches (contents) {
-  const board = Pcb.PCB.load(contents)
-  const getSwitchNum = mod => mod.reference.text.match(/SW(\d+)/)?.[1]
-  const getPosition = mod => ({
-    x: MIL2MM(mod.pos.x),
-    y: MIL2MM(mod.pos.y)
-  })
+  const tree = Parse(contents)
+  const getSwitchNum = sw => Number(sw.name.match(/^SW?(\d+)/)?.[1])
+  const and = (...predicates) => value => predicates.every(predicate => predicate(value))
+  const nameIs = name => value => Array.isArray(value) && value[0] === name
+  const positionMatcher = nameIs('at')
+  const switchTextMatcher = and(
+    nameIs('fp_text'),
+    node => node[1] === 'reference' && node[2].match(/^SW?\d+/)
+  )
 
-  return board.modules
-    .filter(mod => mod.reference.text.startsWith('SW'))
+  return tree
+    .filter(nameIs('module'))
+    .reduce((switches, mod) => {
+      const at = mod.find(positionMatcher)
+      const fpText = mod.find(switchTextMatcher)
+
+      if (fpText) {
+        switches.push({
+          name: fpText[2],
+          angle: Number(at[3] || 0),
+          position: {
+            x: Number(at[1]),
+            y: Number(at[2])
+          }
+        })
+      }
+
+      return switches
+    }, [])
     .sort((a, b) => getSwitchNum(a) - getSwitchNum(b))
-    .map(mod => ({
-      name: mod.reference.text,
-      angle: mod.orientation / 10,
-      position: getPosition(mod)
-    }))
 }
 
 /**
