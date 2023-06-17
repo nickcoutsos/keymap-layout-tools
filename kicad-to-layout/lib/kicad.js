@@ -99,6 +99,15 @@ export function generateLayout (switches) {
     }
 
     if (sw.angle) {
+      // From the kicad file format docs (https://dev-docs.kicad.org/en/file-formats/sexpr-intro/):
+      // > Symbol text ANGLEs are stored in tenth’s of a degree. All other
+      // > ANGLEs are stored in degrees.
+      // Note: I don't know what specifically a text angle is and haven't seen
+      // an example of it in any keyboard's kicad files.
+      // TODO: many keyboard PCBs will have _all_ switches rotated ~180 degrees
+      // because they specifically want to orient the switch that way, and not
+      // because they are implying a speicific "up" direction for that key. This
+      // should have an option to interpret the value on a case-by-case basis.
       key.r = 180 - sw.angle
       key.rx = x + .5
       key.ry = y + .5
