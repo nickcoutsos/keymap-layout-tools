@@ -33,6 +33,7 @@ async function main (args) {
     invert: args.includes('--invert-x'),
     mirror: args.includes('--mirror-x'),
     preview: args.includes('--preview'),
+    ignoreRotationsOver180: args.includes('--ignore-rotations-over-180'),
     spacing: (
       args.includes('--choc')
         ? { x: 18.5, y: 17.5 }
@@ -42,6 +43,15 @@ async function main (args) {
 
   const contents = await fs.readFile(pcbFilename, 'utf-8')
   const layout = kicad.parseKicadLayout(contents, options)
+
+  for (const layoutKey of layout) {
+    for (const prop in layoutKey) {
+      const value = layoutKey[prop]
+      if (typeof value === 'number' && Math.round(value) !== value) {
+        layoutKey[prop] = Number(value.toFixed(2))
+      }
+    }
+  }
 
   console.log(formatMetadata(layout))
 

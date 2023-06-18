@@ -35,7 +35,7 @@ import Parse from 's-expression'
  */
 export function parseKicadLayout (pcbFileContents, options) {
   const tree = Parse(pcbFileContents)
-  const switches = getSwitches(tree)
+  const switches = getSwitches(tree, options)
   let layout = generateLayout(switches, options)
 
   if (options.invert) {
@@ -43,6 +43,21 @@ export function parseKicadLayout (pcbFileContents, options) {
   }
   if (options.mirror) {
     layout = mirror(layout)
+  }
+
+  // Rotation origins are generally weird. KLE's rotations always default to the
+  // canvas origin, QMK's rotations default to the key's top-left corner. Kicad
+  // rotations are around the component's center point so we need to make that
+  // explicit here.
+  // This was originally happening earlier in the `generateLayout` function but
+  // that impacts the flip/mirror logic because the key's origin is the top-left
+  // corner, which means the center is define relative to that point. When the
+  // layout gets flipped it would put the "center" outside the key.
+  for (const key of layout) {
+    if (key.r) {
+      key.rx = key.x + .5
+      key.ry = key.y + .5
+    }
   }
 
   return layout
@@ -53,7 +68,7 @@ export function parseKicadLayout (pcbFileContents, options) {
  * @param {Array} tree
  * @returns {Array<ParsedSwitch>}
  */
-export function getSwitches (tree) {
+export function getSwitches (tree, options) {
   const getSwitchNum = sw => Number(sw.name.match(/^SW?(\d+)/)?.[1])
   const and = (...predicates) => value => predicates.every(predicate => predicate(value))
   const or = (...predicates) => value => predicates.some(predicate => predicate(value))
@@ -72,14 +87,26 @@ export function getSwitches (tree) {
       const fpText = mod.find(switchTextMatcher)
 
       if (fpText) {
-        switches.push({
+        const sw = {
           name: fpText[2],
           angle: Number(at[3] || 0),
           position: {
             x: Number(at[1]),
             y: Number(at[2])
           }
-        })
+        }
+
+        // While parsing the a.dux pcb (https://github.com/tapioki/cephalopoda/tree/main/Architeuthis%20dux)
+        // I noticed that it actually defines the switches for both sides of
+        // the board mirrored and overlayed together. This is not useful for
+        // trying to generate a layout of a full keyboard so I tried filtering
+        // out switches that appear to be reversed. That didn't work well so
+        // this isn't a documented flag right now. This would probably be better
+        // off as filtering out "duplicates" where one switch occupies the same
+        // position as an earlier parsed switch.
+        if (sw.angle <= 180 || !options.ignoreRotationsOver180) {
+          switches.push(sw)
+        }
       }
 
       return switches
@@ -102,8 +129,8 @@ export function generateLayout (switches, options) {
   let col = 0
 
   return switches.reduce((keys, sw, i) => {
-    let x = Number(((sw.position.x - min.x) / options.spacing.x).toFixed(2))
-    let y = Number(((sw.position.y - min.y) / options.spacing.y).toFixed(2))
+    let x = Number(sw.position.x - min.x) / options.spacing.x
+    let y = Number(sw.position.y - min.y) / options.spacing.y
     const prev = keys.at(i - 1)
   
     if (prev && x < prev.x) {
@@ -128,8 +155,6 @@ export function generateLayout (switches, options) {
       // because they are implying a speicific "up" direction for that key. This
       // should have an option to interpret the value on a case-by-case basis.
       key.r = 180 - sw.angle
-      key.rx = x + .5
-      key.ry = y + .5
     }
   
     return [...keys, key]
@@ -154,7 +179,8 @@ export function flip (layout) {
     return row.map(key => ({
       ...key,
       x: maxX - key.x,
-      col: maxCol - key.col
+      col: maxCol - key.col,
+      r: -key.r
     })).reverse()
   })
 }
