@@ -96,15 +96,10 @@ export function getSwitches (tree, options) {
           }
         }
 
-        // While parsing the a.dux pcb (https://github.com/tapioki/cephalopoda/tree/main/Architeuthis%20dux)
-        // I noticed that it actually defines the switches for both sides of
-        // the board mirrored and overlayed together. This is not useful for
-        // trying to generate a layout of a full keyboard so I tried filtering
-        // out switches that appear to be reversed. That didn't work well so
-        // this isn't a documented flag right now. This would probably be better
-        // off as filtering out "duplicates" where one switch occupies the same
-        // position as an earlier parsed switch.
-        if (sw.angle <= 180 || !options.ignoreRotationsOver180) {
+        if (!switches.some(prev => (
+          prev.position.x === sw.position.x &&
+          prev.position.y === sw.position.y
+        ))) {
           switches.push(sw)
         }
       }
