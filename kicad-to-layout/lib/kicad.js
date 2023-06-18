@@ -35,6 +35,8 @@ export function getSwitches (contents) {
   const tree = Parse(contents)
   const getSwitchNum = sw => Number(sw.name.match(/^SW?(\d+)/)?.[1])
   const and = (...predicates) => value => predicates.every(predicate => predicate(value))
+  const or = (...predicates) => value => predicates.some(predicate => predicate(value))
+
   const nameIs = name => value => Array.isArray(value) && value[0] === name
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
@@ -43,7 +45,7 @@ export function getSwitches (contents) {
   )
 
   return tree
-    .filter(nameIs('module'))
+    .filter(or(nameIs('module'), nameIs('footprint')))
     .reduce((switches, mod) => {
       const at = mod.find(positionMatcher)
       const fpText = mod.find(switchTextMatcher)
@@ -76,7 +78,7 @@ export function generateLayout (switches) {
   }))
 
   const spacing = {
-    x: 19, y: 19 // TODO: parameterize this, 18.5,17.5 for choc
+    x: 18.5, y: 17.5 // TODO: parameterize this, 18.5,17.5 for choc
   }
 
   let row = 0
