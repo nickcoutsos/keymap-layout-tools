@@ -7,27 +7,45 @@ import { formatMetadata } from 'keymap-layout-tools/lib/metadata.js'
 import * as kicad from '../lib/kicad.js'
 
 async function main (args) {
-  const flags = args.filter(arg => arg.startsWith('--'))
-  const positional = args.filter(arg => !arg.startsWith('--'))
-  const invertX = flags.includes('--invert-x')
-  const splitMirror = flags.includes('--split-mirror')
-  const renderPreview = flags.includes('--preview')
-  const pcbFilename = positional[0]
+  const pcbFilename = args.find(arg => !arg.startsWith('--'))
+
+  if (!pcbFilename) {
+    console.log(`Usage:
+      node kicad-to-layout.js [options] <path>
+
+      Options:
+        --invert-x    Flip layout data along X axis
+
+        --mirror-x    Mirror layout along X axis (to produce a full keyboard
+                      from a single PCB of a symmetric split).
+
+        --preview     Render the generated layout in terminal using Unicode
+                      braille dots.
+
+        --choc        Interpret switch positioning based on kailh choc key
+                      spacing (18.5mm x 17.5mm).
+    `)
+
+    process.exit(1)
+  }
+
+  const options = {
+    invert: args.includes('--invert-x'),
+    mirror: args.includes('--mirror-x'),
+    preview: args.includes('--preview'),
+    spacing: (
+      args.includes('--choc')
+        ? { x: 18.5, y: 17.5 }
+        : { x: 19, y: 19 }
+    )
+  }
 
   const contents = await fs.readFile(pcbFilename, 'utf-8')
-  const switches = kicad.getSwitches(contents)
-  let layout = kicad.generateLayout(switches)
-
-  if (invertX) {
-    layout = kicad.flip(layout)
-  }
-  if (splitMirror) {
-    layout = kicad.mirror(layout)
-  }
+  const layout = kicad.parseKicadLayout(contents, options)
 
   console.log(formatMetadata(layout))
 
-  if (renderPreview) {
+  if (options.preview) {
     preview(layout)
   }
 }

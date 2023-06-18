@@ -27,12 +27,33 @@ import Parse from 's-expression'
  */
 
 /**
+ * Parse kicad pcb to generate a layout
+ * @param {String} pcbFileContents
+ * @param {Object} options
+ * @param {}
+ * @returns {Array<LayoutKey>}
+ */
+export function parseKicadLayout (pcbFileContents, options) {
+  const tree = Parse(pcbFileContents)
+  const switches = getSwitches(tree)
+  let layout = generateLayout(switches, options)
+
+  if (options.invert) {
+    layout = flip(layout)
+  }
+  if (options.mirror) {
+    layout = mirror(layout)
+  }
+
+  return layout
+}
+
+/**
  * 
- * @param {String} contents
+ * @param {Array} tree
  * @returns {Array<ParsedSwitch>}
  */
-export function getSwitches (contents) {
-  const tree = Parse(contents)
+export function getSwitches (tree) {
   const getSwitchNum = sw => Number(sw.name.match(/^SW?(\d+)/)?.[1])
   const and = (...predicates) => value => predicates.every(predicate => predicate(value))
   const or = (...predicates) => value => predicates.some(predicate => predicate(value))
@@ -71,22 +92,18 @@ export function getSwitches (contents) {
  * @param {Array<ParsedSwitch>} switches
  * @returns {Array<LayoutKey>}
  */
-export function generateLayout (switches) {
+export function generateLayout (switches, options) {
   const min = switches.map(sw => sw.position).reduce((a, b) => ({
     x: Math.min(a.x, b.x),
     y: Math.min(a.y, b.y)
   }))
 
-  const spacing = {
-    x: 18.5, y: 17.5 // TODO: parameterize this, 18.5,17.5 for choc
-  }
-
   let row = 0
   let col = 0
 
   return switches.reduce((keys, sw, i) => {
-    let x = Number(((sw.position.x - min.x) / spacing.x).toFixed(2))
-    let y = Number(((sw.position.y - min.y) / spacing.y).toFixed(2))
+    let x = Number(((sw.position.x - min.x) / options.spacing.x).toFixed(2))
+    let y = Number(((sw.position.y - min.y) / options.spacing.y).toFixed(2))
     const prev = keys.at(i - 1)
   
     if (prev && x < prev.x) {
