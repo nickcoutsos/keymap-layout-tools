@@ -81,7 +81,10 @@ export function getSwitches (tree, options) {
   )
 
   return tree
-    .filter(or(nameIs('module'), nameIs('footprint')))
+    .filter(and(
+      or(nameIs('module'), nameIs('footprint')),
+      node => node[1].match(options.modulePattern)
+    ))
     .reduce((switches, mod) => {
       const at = mod.find(positionMatcher)
       const fpText = mod.find(switchTextMatcher)

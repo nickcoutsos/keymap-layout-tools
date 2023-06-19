@@ -2,42 +2,61 @@
 import fs from 'node:fs/promises'
 import process from 'node:process'
 
-import Canvas from 'drawille-canvas'
+import yargs from 'yargs/yargs'
 import { formatMetadata } from 'keymap-layout-tools/lib/metadata.js'
+
 import * as kicad from '../lib/kicad.js'
+import * as preview from '../lib/preview.js'
+
+const argumentParser = yargs()
+  .positional('path', {
+    describe: 'Path to kicad_pcb file'
+  })
+  .option('invert-x', {
+    describe: 'Flip layout data along X axis',
+    default: false,
+    type: 'boolean'
+  })
+  .option('mirror-x', {
+    describe: 'Mirror layout along X axis (to produce a full keyboard from a single PCB of a symmetric split).',
+    default: false,
+    type: 'boolean'
+  })
+  .option('preview', {
+    describe: 'Render the generated layout in terminal using Unicode braille dots.',
+    default: false,
+    type: 'boolean'
+  })
+  .option('choc', {
+    describe: 'Interpret switch positioning based on kailh choc key spacing (18.5mm x 17.5mm).',
+    default: false,
+    type: 'boolean'
+  })
+  .option('module-pattern', {
+    describe: 'PRCE regex pattern to apply to module/footprints being considered for key switches. This can be used to be more specific where power/reset switches otherwise follow the same naming pattern as keys.',
+    default: '.*',
+    coerce: val => new RegExp(val)
+  })
+  .version(false)
+  .help()
 
 async function main (args) {
-  const pcbFilename = args.find(arg => !arg.startsWith('--'))
-
-  if (!pcbFilename) {
-    console.log(`Usage:
-      node kicad-to-layout.js [options] <path>
-
-      Options:
-        --invert-x    Flip layout data along X axis
-
-        --mirror-x    Mirror layout along X axis (to produce a full keyboard
-                      from a single PCB of a symmetric split).
-
-        --preview     Render the generated layout in terminal using Unicode
-                      braille dots.
-
-        --choc        Interpret switch positioning based on kailh choc key
-                      spacing (18.5mm x 17.5mm).
-    `)
-
-    process.exit(1)
-  }
-
+  const parsed = argumentParser.parse(args)
+  const [pcbFilename] = parsed._
   const options = {
-    invert: args.includes('--invert-x'),
-    mirror: args.includes('--mirror-x'),
-    preview: args.includes('--preview'),
+    invert: parsed.invertX,
+    mirror: parsed.mirrorX,
+    modulePattern: parsed.modulePattern,
     spacing: (
-      args.includes('--choc')
+      parsed.choc
         ? { x: 18.5, y: 17.5 }
         : { x: 19, y: 19 }
     )
+  }
+
+  if (!pcbFilename) {
+    argumentParser.showHelp()
+    process.exit(1)
   }
 
   const contents = await fs.readFile(pcbFilename, 'utf-8')
@@ -52,46 +71,10 @@ async function main (args) {
     }
   }
 
-  if (options.preview) {
-    preview(layout)
-  } else {
-    console.log(formatMetadata(layout))
-  }
-}
-
-function preview (layout) {
-  const canvas = new Canvas()
-  const c = canvas.getContext('2d')
-
-  const SIZE = 12
-  const SPACING = 3
-  for (const layoutKey of layout) {
-    const params = {
-      x: layoutKey.x * (SIZE - 0),
-      y: layoutKey.y * (SIZE - 0),
-      u: (layoutKey.w || 1) * SIZE,
-      h: (layoutKey.h || 1) * SIZE,
-      rx: (layoutKey.x - (layoutKey.rx ?? layoutKey.x)) * -SIZE,
-      ry: (layoutKey.y - (layoutKey.ry ?? layoutKey.y)) * -SIZE,
-      r: layoutKey.r || 0
-    }
-
-    c.save()
-    c.translate(params.rx + params.x, params.ry + params.y)
-    c.rotate(params.r)
-    c.translate(-(params.rx + params.x), -(params.ry + params.y))
-    c.translate(params.x, params.y)
-    c.fillRect(SPACING/2, SPACING/2, params.u - SPACING, params.h - SPACING)
-    c.restore()
-  }
-
   console.log(
-    c.toString()
-      .split('\n')
-      .map(line => line.trimEnd())
-      .filter(line => line.length > 0)
-      .join('\r\n')
-      .replace(/ /g, '⠀')
+    parsed.preview
+      ? preview.render(layout)
+      : formatMetadata(layout)
   )
 }
 
