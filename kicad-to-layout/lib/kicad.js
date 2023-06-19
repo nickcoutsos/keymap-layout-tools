@@ -130,7 +130,7 @@ export function generateLayout (switches, options) {
     let x = Number(sw.position.x - min.x) / options.spacing.x
     let y = Number(sw.position.y - min.y) / options.spacing.y
     const prev = keys.at(i - 1)
-  
+
     if (prev && x < prev.x) {
       row += 1
       col = 0
@@ -148,11 +148,10 @@ export function generateLayout (switches, options) {
       // > ANGLEs are stored in degrees.
       // Note: I don't know what specifically a text angle is and haven't seen
       // an example of it in any keyboard's kicad files.
-      // TODO: many keyboard PCBs will have _all_ switches rotated ~180 degrees
-      // because they specifically want to orient the switch that way, and not
-      // because they are implying a speicific "up" direction for that key. This
-      // should have an option to interpret the value on a case-by-case basis.
-      key.r = 180 - sw.angle
+      key.r = -sw.angle
+      if (Math.abs(sw.angle) > 150 && Math.abs(sw.angle) < 210) {
+        key.r += Math.sign(sw.angle) * 180
+      }
     }
   
     return [...keys, key]
