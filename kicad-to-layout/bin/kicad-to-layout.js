@@ -52,10 +52,10 @@ async function main (args) {
     }
   }
 
-  console.log(formatMetadata(layout))
-
   if (options.preview) {
     preview(layout)
+  } else {
+    console.log(formatMetadata(layout))
   }
 }
 
@@ -81,11 +81,18 @@ function preview (layout) {
     c.rotate(params.r)
     c.translate(-(params.rx + params.x), -(params.ry + params.y))
     c.translate(params.x, params.y)
-    c.fillRect(SPACING, SPACING, params.u - SPACING, params.h - SPACING)
+    c.fillRect(SPACING/2, SPACING/2, params.u - SPACING, params.h - SPACING)
     c.restore()
   }
 
-  console.log(c.toString().trimEnd())
+  console.log(
+    c.toString()
+      .split('\n')
+      .map(line => line.trimEnd())
+      .filter(line => line.length > 0)
+      .join('\r\n')
+      .replace(/ /g, '⠀')
+  )
 }
 
 main(process.argv.slice(2))
