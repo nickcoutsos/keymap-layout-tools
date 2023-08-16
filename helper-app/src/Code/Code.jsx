@@ -3,6 +3,7 @@ import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/v
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
+import DropdownMenu from '../DropdownMenu.jsx'
 import Importer from '../Importers/Importer.jsx'
 import {
   formatMetadata,
@@ -147,7 +148,13 @@ export default function Code ({ value, onChange }) {
             ))}
           </select>
         )}
-        <button onClick={() => setImporter('kicad')}>Import from Kicad PCB</button>
+        <DropdownMenu
+          text="Import..."
+          actions={[
+            { content: 'from Kicad PCB', callback: () => setImporter('kicad') },
+            { content: 'from ZMK Devicetree', callback: () => setImporter('dts') }
+          ]}
+        />
         {kle && (
           <button onClick={handleImportKle} className={styles.kleImport}>
             Import KLE Layout

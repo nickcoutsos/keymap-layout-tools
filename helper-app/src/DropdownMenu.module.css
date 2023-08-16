@@ -1,0 +1,26 @@
+.wrapper {
+  position: relative;
+}
+
+.childrenWrapper {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+
+  background-color: var(--dialog-bg);
+  border-radius: 3px;
+  border: 0.25px solid rgba(0, 0, 0, 0.4);
+  padding: 5px 10px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.childrenWrapper ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wrapper:focus-within .childrenWrapper {
+  visibility: visible;
+}
