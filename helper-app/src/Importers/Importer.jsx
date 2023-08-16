@@ -1,6 +1,8 @@
+import ZmkDtsImporter from './ZmkDevicetree/DtsImporter.jsx'
 import KicadImporter from './Kicad/KicadImporter.jsx'
 
 const importers = {
+  dts: ZmkDtsImporter,
   kicad: KicadImporter
 }
 
