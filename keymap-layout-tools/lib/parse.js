@@ -1,4 +1,4 @@
-import times from 'lodash/times'
+import times from 'lodash/times.js'
 
 /**
  * Parse a line of `RC(m,n)` values into objects with start/end indices
@@ -131,9 +131,4 @@ export function parseLayoutFromMatrix (size) {
       row, col, x: col, y: row
     })))
   )
-}
-
-module.exports = {
-  parseLayout,
-  parseLayoutFromMatrix
 }
