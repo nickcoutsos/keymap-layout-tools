@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
@@ -15,14 +15,21 @@ import styles from './styles.module.css'
 const jsonExtension = json()
 const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
 
+function normalize (layoutOrMetadata) {
+  return isRawLayout(layoutOrMetadata)
+    ? { layouts: { default: { layout: layoutOrMetadata } } }
+    : layoutOrMetadata
+}
+
 export default function Code ({ value, onChange }) {
   const [importer, setImporter] = useState(null)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
+  const initialParse = useMemo(() => normalize(JSON.parse(value)), [value])
   const [{ text, errors, parsed, selectedLayout, kle }, setState] = useState({
     text: value,
     errors: [],
-    parsed: JSON.parse(value),
-    selectedLayout: ''
+    parsed: initialParse,
+    selectedLayout: Object.keys(initialParse.layouts)[0]
   })
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
@@ -46,9 +53,8 @@ export default function Code ({ value, onChange }) {
         return
       }
 
-      const metadata = isRawLayout(parsed)
-        ? { layouts: { default: { layout: parsed } } }
-        : parsed
+      const metadata = normalize(parsed)
+      const defaultLayout = Object.keys(metadata.layouts)[0]
 
       validateInfoJson(metadata)
 
@@ -56,7 +62,8 @@ export default function Code ({ value, onChange }) {
         ...state,
         text,
         errors: [],
-        parsed
+        parsed,
+        selectedLayout: state.selectedLayout in metadata.layouts ? state.selectedLayout : defaultLayout
       }))
     } catch (err) {
       const errors = err instanceof InfoValidationError
@@ -68,9 +75,7 @@ export default function Code ({ value, onChange }) {
   }, [setState])
 
   useEffect(() => {
-    const metadata = isRawLayout(parsed)
-      ? { layouts: { default: { layout: parsed } } }
-      : parsed
+    const metadata = normalize(parsed)
 
     onChange(
       metadata.layouts[selectedLayout]?.layout ||
