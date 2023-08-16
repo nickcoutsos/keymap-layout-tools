@@ -12,11 +12,12 @@
   body {
     color-scheme: dark;
     --code-bg: rgba(255, 255, 255, 0.1);
-    --bg: #123;
-    --bg-rgb: 17,34,51;
     --fg: white;
-    --key-bg-base: #1c2c3b;
-    --key-color-base: #b7b7b7;
+    --bg: hsl(211, 31.9%, 13%);
+    --bg-rgb: 17,34,51;
+    --dialog-bg: hsl(210, 30%, 17%);
+    --key-bg-base: hsl(208.2, 23%, 25%);
+    --key-color-base: hsl(0, 0%, 90%);
     --key-color-extreme: #e7e7e7;
   }
 }
