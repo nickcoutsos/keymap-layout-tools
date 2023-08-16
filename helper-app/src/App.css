@@ -7,6 +7,7 @@
   --key-color-base: #6f6f6f;
   --key-color-extreme: #313131;
   --code-bg: rgba(0, 0, 0, 0.1);
+  --dialog-bg: white;
 }
 @media (prefers-color-scheme: dark) {
   body {
@@ -50,4 +51,8 @@ pre {
   background-color: var(--code-bg);
   padding: 15px;
   border-radius: 3px;
+}
+
+:disabled, :disabled * {
+  cursor: not-allowed;
 }

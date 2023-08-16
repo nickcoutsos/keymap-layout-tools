@@ -1,0 +1,41 @@
+.dialog {
+  background-color: var(--bg);
+  padding: 0 20px 10px;
+  min-width: 500px;
+  width: fit-content;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  border: 0.25px solid rgba(0, 0, 0, 0.4);
+}
+
+.heading {
+  position: sticky;
+  top: 0px;
+  overflow: auto;
+
+  margin: 0 -20px;
+  padding: 0px 20px;
+
+  background-color: var(--bg);
+}
+
+.heading h2:first-child {
+  border-bottom: 1px solid var(--code-bg);
+  margin-bottom: 0;
+}
+
+.note {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: var(--code-bg);
+  border-radius: 8px;
+}
+.note p:first-child {
+  margin-top: 0;
+}
+.note p:last-child {
+  margin-bottom: 0;
+}
