@@ -38,7 +38,9 @@ export default function DtsImporter ({ onSubmit, onCancel }) {
   return (
     <Modal onDismiss={onCancel}>
       <div className={styles.dialog}>
-        <h2 className={styles.heading}>Import Devicetree Layouts</h2>
+        <div className={styles.heading}>
+          <h2>Import Devicetree Layouts</h2>
+        </div>
 
         <div className={styles.note}>
           <p>
