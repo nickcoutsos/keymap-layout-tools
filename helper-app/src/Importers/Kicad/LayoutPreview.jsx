@@ -63,7 +63,7 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
   return {
     width: `${bbox.x * scale}px`,
     height: `${bbox.y * scale}px`,
-    margin: '0 auto',
+    margin: '10px auto',
     ...overrides
   }
 }
