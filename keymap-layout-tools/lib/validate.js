@@ -68,8 +68,3 @@ export function validateInfoJson (info) {
     throw new InfoValidationError(errors)
   }
 }
-
-module.exports = {
-  InfoValidationError,
-  validateInfoJson
-}
