@@ -139,6 +139,7 @@ export function generateLayout (switches, options) {
     const key = {
       row,
       col: col++,
+      r: 0,
       x, y
     }
 
