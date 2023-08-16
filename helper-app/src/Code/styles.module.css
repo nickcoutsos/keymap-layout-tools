@@ -6,4 +6,7 @@
 
 .error {
   color: tomato;
+  font-size: 80%;
+  max-height: 5em;
+  overflow: auto;
 }

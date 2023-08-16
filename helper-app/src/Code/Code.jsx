@@ -5,12 +5,7 @@ import { json } from '@codemirror/lang-json'
 
 import DropdownMenu from '../DropdownMenu.jsx'
 import Importer from '../Importers/Importer.jsx'
-import {
-  formatMetadata,
-  isKleLayout,
-  isRawLayout,
-  parseKleLayout
-} from './util'
+import { formatMetadata, isRawLayout } from './util'
 import styles from './styles.module.css'
 
 const jsonExtension = json()
@@ -26,7 +21,7 @@ export default function Code ({ value, onChange }) {
   const [importer, setImporter] = useState(null)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
   const initialParse = useMemo(() => normalize(JSON.parse(value)), [value])
-  const [{ text, errors, parsed, selectedLayout, kle }, setState] = useState({
+  const [{ text, errors, parsed, selectedLayout }, setState] = useState({
     text: value,
     errors: [],
     parsed: initialParse,
@@ -47,13 +42,6 @@ export default function Code ({ value, onChange }) {
   const handleEdit = useCallback(text => {
     try {
       const parsed = JSON.parse(text)
-      const kle = isKleLayout(parsed)
-
-      if (kle) {
-        setState(state => ({ ...state, text, errors: [], kle: true }))
-        return
-      }
-
       const metadata = normalize(parsed)
       const defaultLayout = Object.keys(metadata.layouts)[0]
 
@@ -110,14 +98,6 @@ export default function Code ({ value, onChange }) {
     setState(state => ({ ...state, selectedLayout: event.target.value }))
   }, [setState])
 
-  const handleImportKle = useCallback(() => {
-    setState(state => {
-      const parsed = parseKleLayout(JSON.parse(state.text))
-      const text = formatMetadata(parsed)
-      return { ...state, parsed, text, kle: false }
-    })
-  }, [setState])
-
   return (
     <>
       {importer && (
@@ -151,15 +131,11 @@ export default function Code ({ value, onChange }) {
         <DropdownMenu
           text="Import..."
           actions={[
-            { content: 'from Kicad PCB', callback: () => setImporter('kicad') },
-            { content: 'from ZMK Devicetree', callback: () => setImporter('dts') }
+            { content: 'import from Kicad PCB', callback: () => setImporter('kicad') },
+            { content: 'import from ZMK Devicetree', callback: () => setImporter('dts') },
+            { content: 'import from KLE JSON', callback: () => setImporter('kle') }
           ]}
         />
-        {kle && (
-          <button onClick={handleImportKle} className={styles.kleImport}>
-            Import KLE Layout
-          </button>
-        )}
       </div>
       <CodeMirror
         value={text}
@@ -171,13 +147,13 @@ export default function Code ({ value, onChange }) {
       />
       {errors.length > 0 && (
         <div className={styles.error}>
-          <ul>
+          <ol>
             {errors.map((error, i) => (
               <li key={i}>
                 {error}
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       )}
     </>
