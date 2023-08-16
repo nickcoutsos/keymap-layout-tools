@@ -3,6 +3,7 @@ import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/v
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
+import Importer from '../Importers/Importer.jsx'
 import {
   formatMetadata,
   isKleLayout,
@@ -15,6 +16,7 @@ const jsonExtension = json()
 const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
 
 export default function Code ({ value, onChange }) {
+  const [importer, setImporter] = useState(null)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
   const [{ text, errors, parsed, selectedLayout, kle }, setState] = useState({
     text: value,
@@ -27,7 +29,6 @@ export default function Code ({ value, onChange }) {
 
   useEffect(() => {
     const handleChange = e => {
-      console.log(e)
       setTheme(e.matches ? 'dark' : 'light')
     }
 
@@ -113,6 +114,20 @@ export default function Code ({ value, onChange }) {
 
   return (
     <>
+      {importer && (
+        <Importer
+          type={importer}
+          onSubmit={layout => {
+            setState(state => ({
+              ...state,
+              parsed: layout,
+              text: formatMetadata(layout)
+            }))
+            setImporter(null)
+          }}
+          onCancel={() => setImporter(null)}
+        />
+      )}
       <div className={styles.actions}>
         <button onClick={handleFormat}>Format</button>
         {isRawLayout(parsed) && (
@@ -127,6 +142,7 @@ export default function Code ({ value, onChange }) {
             ))}
           </select>
         )}
+        <button onClick={() => setImporter('kicad')}>Import from Kicad PCB</button>
         {kle && (
           <button onClick={handleImportKle} className={styles.kleImport}>
             Import KLE Layout
