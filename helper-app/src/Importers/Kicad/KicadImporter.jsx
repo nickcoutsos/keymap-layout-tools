@@ -1,12 +1,15 @@
 import cloneDeep from 'lodash/cloneDeep.js'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 
 import { getKeyBoundingBox } from 'keymap-layout-tools/lib/geometry'
 import * as kicad from 'kicad-to-layout'
 
-import Key from '../Key.jsx'
-import KeyPlacer from '../KeyPlacer.jsx'
-import Modal from '../Modal.jsx'
+import FileSelect from './FileSelect.jsx'
+import ParseOptions from './ParseOptions.jsx'
+
+import Key from '../../Key.jsx'
+import KeyPlacer from '../../KeyPlacer.jsx'
+import Modal from '../../Modal.jsx'
 
 const style = {
   backgroundColor: 'var(--bg)',
@@ -155,90 +158,4 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
     margin: '0 auto',
     ...overrides
   }
-}
-
-function FileSelect ({ onChange }) {
-  const [loading, setLoading] = useState(null)
-
-  const handleChange = useCallback(async event => {
-    const [file] = event.target.files
-    setLoading(true)
-    try {
-      const contents = await file.text()
-      onChange({ name: file.name, contents })
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }, [onChange, setLoading])
-
-  return (
-    <>
-      <input
-        type="file"
-        accept="*.kicad_pcb"
-        onChange={handleChange}
-      />
-      {loading && <span><em>Loading...</em></span>}
-    </>
-  )
-}
-
-function ParseOptions ({ options, onChange }) {
-  const handleChange = useCallback(event => {
-    const name = event.target.name
-    const value = event.target.type === 'checkbox'
-      ? event.target.checked
-      : event.target.value
-
-    onChange({ ...options, [name]: value })
-  }, [options, onChange])
-
-  return (
-    <>
-      <div>
-        <label>
-          <input
-            name="choc"
-            type="checkbox"
-            value={options.choc}
-            onChange={handleChange}
-          /> Use Choc Spacing
-        </label>
-      </div>
-
-      <div>
-        <label>
-          <input
-            name="invertX"
-            type="checkbox"
-            value={options.invertX}
-            onChange={handleChange}
-          /> Flip Horizontal
-        </label>
-      </div>
-
-      <div>
-        <label>
-          <input
-            name="mirrorX"
-            type="checkbox"
-            value={options.mirrorX}
-            onChange={handleChange}
-          /> Mirror Horizontal
-        </label>
-      </div>
-      <div>
-        <label>
-          Module pattern: <input
-            name="pattern"
-            type="text"
-            value={options.pattern}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-    </>
-  )
 }

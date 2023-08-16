@@ -1,4 +1,4 @@
-import KicadImporter from './KicadImporter.jsx'
+import KicadImporter from './Kicad/KicadImporter.jsx'
 
 const importers = {
   kicad: KicadImporter
