@@ -3,12 +3,12 @@ import { useState, useMemo } from 'react'
 
 import * as kicad from 'kicad-to-layout'
 
-import FileSelect from './FileSelect.jsx'
 import ParseOptions from './ParseOptions.jsx'
 import styles from './styles.module.css'
-import LayoutPreview from './LayoutPreview.jsx'
 
-import Modal from '../../Modal.jsx'
+import FileSelect from '../../Common/FileSelect.jsx'
+import LayoutPreview from '../../Common/LayoutPreview.jsx'
+import Modal from '../../Common/Modal.jsx'
 
 export default function KicadImporter ({ onSubmit, onCancel }) {
   const [contents, setContents] = useState('')

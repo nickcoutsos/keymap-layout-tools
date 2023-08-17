@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 
 import { getKeyBoundingBox } from 'keymap-layout-tools/lib/geometry.js'
 
-import Key from '../../Key.jsx'
-import KeyPlacer from '../../KeyPlacer.jsx'
+import Key from '../Key.jsx'
+import KeyPlacer from '../KeyPlacer.jsx'
 
 export default function LayoutPreview ({ metadata, scale = 0.4 }) {
   const layouts = Object.keys(metadata.layouts)

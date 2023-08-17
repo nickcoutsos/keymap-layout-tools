@@ -3,10 +3,10 @@ import { useState, useMemo } from 'react'
 import { useParser } from './devicetree.js'
 import parseLayouts from './parse-layouts.js'
 
-import Modal from '../../Modal.jsx'
 import styles from '../Kicad/styles.module.css'
-import FileSelect from '../Kicad/FileSelect.jsx'
-import LayoutPreview from '../Kicad/LayoutPreview.jsx'
+import FileSelect from '../../Common/FileSelect.jsx'
+import LayoutPreview from '../../Common/LayoutPreview.jsx'
+import Modal from '../../Common/Modal.jsx'
 
 export default function DtsImporter ({ onSubmit, onCancel }) {
   const [value, setValue] = useState('')
