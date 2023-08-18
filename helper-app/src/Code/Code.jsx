@@ -3,7 +3,6 @@ import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/v
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
-import DropdownMenu from '../DropdownMenu.jsx'
 import Importer from '../Importers/Importer.jsx'
 import { formatMetadata, isRawLayout } from './util'
 import styles from './styles.module.css'
@@ -18,7 +17,7 @@ function normalize (layoutOrMetadata) {
 }
 
 export default function Code ({ value, onChange }) {
-  const [importer, setImporter] = useState(null)
+  const [showImporterDialog, setShowImporterDialog] = useState(false)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
   const initialParse = useMemo(() => normalize(JSON.parse(value)), [value])
   const [{ text, errors, parsed, selectedLayout }, setState] = useState({
@@ -100,18 +99,17 @@ export default function Code ({ value, onChange }) {
 
   return (
     <>
-      {importer && (
+      {showImporterDialog && (
         <Importer
-          type={importer}
           onSubmit={layout => {
             setState(state => ({
               ...state,
               parsed: layout,
               text: formatMetadata(layout)
             }))
-            setImporter(null)
+            setShowImporterDialog(false)
           }}
-          onCancel={() => setImporter(null)}
+          onCancel={() => setShowImporterDialog(false)}
         />
       )}
       <div className={styles.actions}>
@@ -128,14 +126,9 @@ export default function Code ({ value, onChange }) {
             ))}
           </select>
         )}
-        <DropdownMenu
-          text="Import..."
-          actions={[
-            { content: 'import from Kicad PCB', callback: () => setImporter('kicad') },
-            { content: 'import from ZMK Devicetree', callback: () => setImporter('dts') },
-            { content: 'import from KLE JSON', callback: () => setImporter('kle') }
-          ]}
-        />
+        <button onClick={() => setShowImporterDialog(true)}>
+          Import...
+        </button>
       </div>
       <CodeMirror
         value={text}
