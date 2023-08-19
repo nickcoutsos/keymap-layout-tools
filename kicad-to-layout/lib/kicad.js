@@ -77,7 +77,12 @@ export function getSwitches (tree, options) {
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
     nameIs('fp_text'),
-    node => node[1] === 'reference' && node[2].match(/^SW?\d+/)
+    // TODO: Make these patterns configurable like/instead of modulePattern?
+    node => node[1] === 'reference' && (
+      node[2].match(/^S(WL?)?\d+/) ||
+      node[2].match(/^MX\d+/) ||
+      node[2].match(/^K.+?\d+$/)
+    )
   )
 
   return tree
@@ -121,7 +126,7 @@ export function generateLayout (switches, options) {
   const min = switches.map(sw => sw.position).reduce((a, b) => ({
     x: Math.min(a.x, b.x),
     y: Math.min(a.y, b.y)
-  }))
+  }), { x: Infinity, y: Infinity })
 
   let row = 0
   let col = 0
@@ -144,7 +149,8 @@ export function generateLayout (switches, options) {
     }
 
     if (sw.angle) {
-      // From the kicad file format docs (https://dev-docs.kicad.org/en/file-formats/sexpr-intro/):
+      // From the kicad file format docs:
+      // (https://dev-docs.kicad.org/en/file-formats/sexpr-intro/)
       // > Symbol text ANGLEs are stored in tenth’s of a degree. All other
       // > ANGLEs are stored in degrees.
       // Note: I don't know what specifically a text angle is and haven't seen

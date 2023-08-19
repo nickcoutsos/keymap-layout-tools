@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import * as kicad from 'kicad-to-layout'
 
 import ParseOptions from './ParseOptions.jsx'
+import styles from './styles.module.css'
 
 import FileSelect from '../../Common/FileSelect.jsx'
 import LayoutPreview from '../../Common/LayoutPreview.jsx'
@@ -96,6 +97,11 @@ export default function KicadImporter ({ onUpdate }) {
       </fieldset>
 
       <h3>3. Preview</h3>
+      {layout && layout.length === 0 && (
+        <div className={styles.warning}>
+          ⚠️ No switches could be parsed
+        </div>
+      )}
       {metadata && <LayoutPreview metadata={metadata} />}
     </>
   )

@@ -56,7 +56,7 @@ export default function Importer ({ onSubmit, onCancel }) {
   const { notes, component: Component } = importers[selectedImporter]
 
   return (
-    <Modal onDismiss={onCancel}>
+    <Modal>
       <div className={styles.dialog}>
         <div className={styles.heading}>
           <h2>Import from <select
