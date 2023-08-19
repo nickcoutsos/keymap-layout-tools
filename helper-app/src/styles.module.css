@@ -45,3 +45,7 @@
   background-color: var(--key-bg-base);
   cursor: default;
 }
+
+.keyIsoEnter {
+  clip-path: path("M 0 0 L 0 4 A 4 4 0 0 1 4 0 L 96 0 A 4 4 0 0 1 100 4 L 100 131 A 4 4 0 0 1 96 135 L 21.5 135 A 4 4 0 0 1 17.5 131 L 17.5 69 A 4 4 0 0 0 13.5 65 L 4 65 A 4 4 0 0 1 0 61");
+}
