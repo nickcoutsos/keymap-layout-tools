@@ -1,0 +1,13 @@
+.selected {
+  background-color: royalblue;
+  color: var(--bg);
+}
+.preview {
+  border: 2px solid royalblue;
+}
+.selected.previewDeselect {
+  background-color: hsla(225, 73%, 57%, 0.103);
+}
+.previewDeselect {
+  /* border: 2px solid var(--key-color-extreme); */
+}

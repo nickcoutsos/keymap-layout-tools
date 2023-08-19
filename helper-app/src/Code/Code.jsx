@@ -4,6 +4,7 @@ import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
 import Importer from '../Importers/Importer.jsx'
+import Reorder from '../Reorder/Reorder.jsx'
 import { formatMetadata, isRawLayout } from './util'
 import styles from './styles.module.css'
 
@@ -18,6 +19,7 @@ function normalize (layoutOrMetadata) {
 
 export default function Code ({ value, onChange }) {
   const [showImporterDialog, setShowImporterDialog] = useState(false)
+  const [showReorderDialog, setShowReorderDialog] = useState(false)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
   const initialParse = useMemo(() => normalize(JSON.parse(value)), [value])
   const [{ text, errors, parsed, selectedLayout }, setState] = useState({
@@ -28,6 +30,18 @@ export default function Code ({ value, onChange }) {
   })
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
+  const layout = useMemo(() => {
+    if (!parsed) {
+      return null
+    }
+
+    if (isRawLayout(parsed)) {
+      return parsed
+    }
+
+    const defaultLayout = Object.keys(parsed.layouts || {})[0]
+    return parsed.layouts[selectedLayout]?.layout || parsed.layouts[defaultLayout]?.layout
+  }, [parsed, selectedLayout])
 
   useEffect(() => {
     const handleChange = e => {
@@ -93,18 +107,36 @@ export default function Code ({ value, onChange }) {
     })
   }, [setState])
 
+  const handleReorderedLayout = useCallback(layout => {
+    setState(state => ({
+      ...state,
+      parsed: layout,
+      selectedLayout: null,
+      text: formatMetadata(layout)
+    }))
+    setShowReorderDialog(false)
+  }, [setState, setShowReorderDialog])
+
   const handleSelectLayout = useCallback(event => {
     setState(state => ({ ...state, selectedLayout: event.target.value }))
   }, [setState])
 
   return (
     <>
+      {layout && showReorderDialog && (
+        <Reorder
+          layout={layout}
+          onUpdate={handleReorderedLayout}
+          onCancel={() => setShowReorderDialog(false)}
+        />
+      )}
       {showImporterDialog && (
         <Importer
           onSubmit={layout => {
             setState(state => ({
               ...state,
               parsed: layout,
+              selectedLayout: null,
               text: formatMetadata(layout)
             }))
             setShowImporterDialog(false)
@@ -119,6 +151,7 @@ export default function Code ({ value, onChange }) {
             Generate metadata
           </button>
         )}
+        <button onClick={() => setShowReorderDialog(true)}>Re-order</button>
         {layouts.length > 1 && (
           <select value={selectedLayout} onChange={handleSelectLayout}>
             {layouts.map((name, i) => (

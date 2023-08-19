@@ -1,0 +1,23 @@
+.container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container.selecting {
+  cursor: crosshair;
+}
+
+.overlay {
+  position: absolute;
+  background-color: hsla(225, 73%, 57%, 0.103);
+  border: 3px dotted hsla(225, 73%, 57%, 0.7);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.overlay.negate {
+  background-color: rgba(120, 120, 120, 0.1);
+  border-color: rgba(120, 120, 120, 0.25);
+}

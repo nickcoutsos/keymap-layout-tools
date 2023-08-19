@@ -5,7 +5,7 @@ import { getKeyBoundingBox } from 'keymap-layout-tools/lib/geometry.js'
 import Key from '../Key.jsx'
 import KeyPlacer from '../KeyPlacer.jsx'
 
-export default function LayoutPreview ({ metadata, scale = 0.4 }) {
+export default function LayoutPreview ({ metadata, scale = 0.4, renderKey = defaultRenderKey }) {
   const layouts = Object.keys(metadata.layouts)
   const [selectedLayout, setSelectedLayout] = useState(layouts[0])
 
@@ -40,7 +40,7 @@ export default function LayoutPreview ({ metadata, scale = 0.4 }) {
                 key={index}
                 keyLayout={keyLayout}
               >
-                <Key index={index} keyLayout={keyLayout} />
+                {renderKey({ index, keyLayout })}
               </KeyPlacer>
             ))}
           </div>
@@ -48,6 +48,10 @@ export default function LayoutPreview ({ metadata, scale = 0.4 }) {
       )}
     </>
   )
+}
+
+function defaultRenderKey (props) {
+  return <Key {...props} />
 }
 
 function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {

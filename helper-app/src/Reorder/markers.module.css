@@ -1,0 +1,69 @@
+:root {
+  --length: 75px;
+  --width: 30px;
+  --hyp: 21.21px;
+}
+
+.marker {
+  position: absolute;
+  width: var(--length);
+  height: var(--width);
+  line-height: var(--width);
+  text-align: center;
+  font-size: 85%;
+
+  color: var(--key-color-base);
+  background-color: var(--key-bg-base);
+  border: 2px solid var(--key-color-base);
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  cursor: pointer;
+}
+
+.marker::after {
+  content: '';
+  position: absolute;
+  width: var(--hyp);
+  aspect-ratio: 1;
+  transform-origin: center;
+
+  box-sizing: border-box;
+
+  background-color: var(--key-bg-base);
+  clip-path: polygon(100% -10%, -10% 100%, 100% 100%);
+  border: 2px solid var(--key-color-base);
+  border-radius: 3px;
+  border-left-width: 0;
+  border-top-width: 0;
+}
+
+.marker:not(.vertical) {
+  border-right-width: 0;
+  margin-right: calc(var(--hyp) / 2);
+  transform: translate(calc(-100% - var(--hyp)), -50%);
+}
+.marker:not(.vertical)::after {
+  right: 0;
+  top: 50%;
+  transform: translate(calc(50% - 2px), -50%) rotate(-45deg);
+}
+.marker.vertical {
+  display: inline-block;
+  width: var(--width);
+  height: var(--length);
+  border-bottom-width: 0;
+  margin-bottom: calc(var(--hyp) / 2);
+  transform: translate(-50%, calc(-100% - var(--hyp)));
+}
+.marker.vertical::after {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, calc(50% - 2px)) rotate(45deg)
+}
+
+.marker.active, .marker.active::after {
+  color: royalblue;
+  border-color: royalblue;
+  font-weight: bold;
+}
