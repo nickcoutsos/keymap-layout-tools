@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 
 import { useKicadImporter } from './hooks.js'
-import ParseOptions from './ParseOptions.jsx'
+import ParseOptions, { DEFAULT_OPTIONS } from './ParseOptions.jsx'
 import styles from './styles.module.css'
 
 import FileSelect from '../../Common/FileSelect.jsx'
@@ -10,12 +10,7 @@ import Key from '../../Key.jsx'
 
 export default function KicadImporter ({ onUpdate }) {
   const [contents, setContents] = useState('')
-  const [options, setOptions] = useState({
-    invert: false,
-    mirror: false,
-    choc: false,
-    pattern: '.*'
-  })
+  const [options, setOptions] = useState(DEFAULT_OPTIONS)
 
   const { switches, layout: previewLayout } = useKicadImporter(contents, options)
   const layoutWithSwitchInfo = useMemo(() => {
@@ -69,6 +64,7 @@ export default function KicadImporter ({ onUpdate }) {
       {previewLayout && (
         <Layout
           layout={layoutWithSwitchInfo}
+          scale={0.5}
           overrides={{ margin: '0 auto' }}
           renderKey={renderSwitch}
         />

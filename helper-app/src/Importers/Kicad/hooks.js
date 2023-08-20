@@ -26,8 +26,11 @@ export function useKicadImporter (contents, options) {
   ), [contents])
 
   const switches = useMemo(() => (
-    tree && getSwitches(tree, { modulePattern: options.pattern })
-  ), [tree, options.pattern])
+    tree && getSwitches(tree, {
+      modulePattern: options.modulePattern,
+      switchPattern: options.switchPattern
+    })
+  ), [tree, options.modulePattern, options.switchPattern])
 
   const rawLayout = useMemo(() => (
     switches && generateLayout(switches, { spacing })

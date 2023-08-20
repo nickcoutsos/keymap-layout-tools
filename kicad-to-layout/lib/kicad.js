@@ -6,6 +6,9 @@ import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
 import * as modifiers from 'keymap-layout-tools/lib/modifiers.js'
 import Parse from 's-expression'
 
+export const DEFAULT_MODULE_PATTERN = '.*'
+export const DEFAULT_SWITCH_PATTERN = '^(S(WL?)?|MX|K.+?)\\d+'
+
 /**
  * @typedef {Object} LayoutKey
  * @property {Number} x - graphical position
@@ -83,6 +86,9 @@ export function parseKicadLayout (pcbFileContents, options) {
 /**
  * 
  * @param {Array} tree
+ * @param {Object} options
+ * @param {String|RegExp} options.modulePattern
+ * @param {String|RegExp} options.switchPattern
  * @returns {Array<ParsedSwitch>}
  */
 export function getSwitches (tree, options) {
@@ -94,18 +100,16 @@ export function getSwitches (tree, options) {
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
     nameIs('fp_text'),
-    // TODO: Make these patterns configurable like/instead of modulePattern?
-    node => node[1] === 'reference' && (
-      node[2].match(/^S(WL?)?\d+/) ||
-      node[2].match(/^MX\d+/) ||
-      node[2].match(/^K.+?\d+$/)
+    node => (
+      node[1] === 'reference' &&
+      node[2].match(options.switchPattern || DEFAULT_SWITCH_PATTERN)
     )
   )
 
   return tree
     .filter(and(
       or(nameIs('module'), nameIs('footprint')),
-      node => node[1].match(options.modulePattern)
+      node => node[1].match(options.modulePattern || DEFUALT_MODULE_PATTERN)
     ))
     .reduce((switches, mod) => {
       const at = mod.find(positionMatcher)
