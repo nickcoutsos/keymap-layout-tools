@@ -55,11 +55,6 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     polygons: keyPolygons
   })
 
-  const negate = dragProps.negate
-  const intersecting = dragProps.selecting
-    ? dragProps.intersecting
-    : []
-
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
   const colMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.columns, 'x'), [keyCenters, state.columns])
 
@@ -72,16 +67,18 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
         previewSelection[1]
       ].includes(index)
     )
-    const previewDragSelect = negate
+
+    const intersecting = dragProps.selecting ? dragProps.intersecting : []
+    const previewDragSelect = dragProps.negate
       ? intersecting.filter(index => group.includes(index))
       : intersecting.filter(index => !group.includes(index))
 
     const preview = (
-      (!negate && previewDragSelect.includes(index)) ||
+      (!dragProps.negate && previewDragSelect.includes(index)) ||
       (previewMarkerHover)
     )
 
-    const previewDeselect = negate && previewDragSelect.includes(index)
+    const previewDeselect = dragProps.negate && previewDragSelect.includes(index)
 
     // TODO: Render RC(r,c) on keys for extra context
     // TODO: indicate keys without current row/col assignments
@@ -108,8 +105,9 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     state,
     actions,
     previewSelection,
-    intersecting,
-    negate
+    dragProps.negate,
+    dragProps.selecting,
+    dragProps.intersecting
   ])
 
   const handleConfirm = useCallback(() => {
@@ -249,17 +247,31 @@ function getMarkerPositions (keyCenters, groups, axis) {
     return meanBy(points, axis)
   })
 
-  let lastGood = 0
+  let lastGoodIndex = 0
+
+  if (Number.isNaN(positions[0])) {
+    positions[0] = 0
+  }
 
   for (let i = 0; i < positions.length; i++) {
     if (notNaN(positions[i])) {
-      lastGood = positions[i]
+      lastGoodIndex = i
       continue
     }
 
-    // TODO: this doesn't seem to work when adding an extra blank column
-    const nextGood = positions.slice(i).find(notNaN) || (positions.length * 50)
-    lastGood = positions[i] = (lastGood + nextGood) / 2
+    // If there's still a well-positioned marker ahead then find the distance
+    // from the last well-positioned marker and divide that space up.
+    const nextGoodIndex = positions.slice(i).findIndex(notNaN)
+    if (nextGoodIndex !== -1) {
+      const index = nextGoodIndex + i
+      const skipped = index - lastGoodIndex
+      const distance = positions[index] - positions[lastGoodIndex]
+      positions[i] = positions[lastGoodIndex] + distance / skipped * (i - lastGoodIndex)
+    } else {
+      // When there are no more markers with proper positions just offset
+      positions[i] = positions[lastGoodIndex] + 50
+      lastGoodIndex = i
+    }
   }
 
   return positions

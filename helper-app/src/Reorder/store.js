@@ -59,7 +59,11 @@ function reducer (state, action) {
     case 'ADD_GROUP':
       return {
         ...state,
-        selection: state[state.selectionMode].length,
+        selection: (
+          action.afterSelected
+            ? state.selection + 1
+            : state[state.selectionMode].length
+        ),
         [state.selectionMode]: (
           !action.afterSelected
             ? [...state[state.selectionMode], []]
@@ -73,6 +77,7 @@ function reducer (state, action) {
     case 'REMOVE_GROUP':
       return {
         ...state,
+        selection: Math.max(0, state.selection - 1),
         [state.selectionMode]: [
           ...state[state.selectionMode].slice(0, state.selection),
           ...state[state.selectionMode].slice(state.selection + 1)
