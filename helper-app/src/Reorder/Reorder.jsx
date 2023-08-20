@@ -49,6 +49,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
       : actions.addToSelected(intersecting)
   }, [actions])
 
+  // TODO: Add "freeform" line selection
   const [dragProps, DragSelectContainer] = useDragSelector({
     onSelect: handleDragSelect,
     polygons: keyPolygons
@@ -82,6 +83,9 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
 
     const previewDeselect = negate && previewDragSelect.includes(index)
 
+    // TODO: Render RC(r,c) on keys for extra context
+    // TODO: indicate keys without current row/col assignments
+    // TODO: keyboard shortcuts for next/prev/add group
     return (
       <Key
         {...props}
@@ -253,6 +257,7 @@ function getMarkerPositions (keyCenters, groups, axis) {
       continue
     }
 
+    // TODO: this doesn't seem to work when adding an extra blank column
     const nextGood = positions.slice(i).find(notNaN) || (positions.length * 50)
     lastGood = positions[i] = (lastGood + nextGood) / 2
   }

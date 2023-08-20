@@ -24,6 +24,8 @@ export default function KicadImporter ({ onUpdate }) {
     }
 
     // TODO: use the individual functions to avoid re-parsing when possible
+    // TODO: parse switch labels for context when inspecting/debugging the
+    // layout preview
     const layout = parseKicadLayout(contents, {
       modulePattern: options.pattern,
       invert: options.invertX,

@@ -26,13 +26,14 @@ const importers = {
     notes: (
       <>
         <p>
-          Importing switch data from a Kicad PCBs will yield the most accurate
-          position and rotation details but they are often not ordered the same
-          way they'd be used in keymap bindings. Depending on the PCB there may
-          be some manual sorting required, especially
-          for <code>row</code> / <code>col</code> properties.
+          Importing switch data from Kicad PCBs will yield the most accurate
+          position and rotation details but they are often not ordered for use
+          in keymap bindings.
         </p>
-        <p>This is still in progress.</p>
+        <p>
+          After import you may wish to use the <em>Re-map</em> tool to manally
+          assign keys to the appropriate row and column.
+        </p>
       </>
     )
   },

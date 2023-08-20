@@ -108,6 +108,7 @@ export default function Code ({ value, onChange }) {
   }, [setState])
 
   const handleReorderedLayout = useCallback(layout => {
+    // TODO: handle updating specific layout in metadata collection
     setState(state => ({
       ...state,
       parsed: layout,
