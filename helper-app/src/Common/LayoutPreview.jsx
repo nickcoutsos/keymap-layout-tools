@@ -1,21 +1,18 @@
 import { useMemo, useState } from 'react'
 
-import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
+import Layout from './Layout.jsx'
 
-import Key from '../Key.jsx'
-import KeyPlacer from '../KeyPlacer.jsx'
+const overrides = {
+  margin: '10px auto'
+}
 
-export default function LayoutPreview ({ metadata, scale = 0.4, renderKey = defaultRenderKey }) {
+export default function LayoutPreview ({ metadata, ...props }) {
   const layouts = Object.keys(metadata.layouts)
   const [selectedLayout, setSelectedLayout] = useState(layouts[0])
 
   const layout = useMemo(() => (
     metadata.layouts[selectedLayout]?.layout
   ), [metadata.layouts, selectedLayout])
-
-  const wrapperStyle = useMemo(() => (
-    layout && getWrapperStyle(layout, { scale })
-  ), [layout, scale])
 
   return (
     <>
@@ -33,36 +30,12 @@ export default function LayoutPreview ({ metadata, scale = 0.4, renderKey = defa
         </div>
       )}
       {layout && (
-        <div style={wrapperStyle}>
-          <div style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}>
-            {layout.map((keyLayout, index) => (
-              <KeyPlacer
-                key={index}
-                keyLayout={keyLayout}
-              >
-                {renderKey({ index, keyLayout })}
-              </KeyPlacer>
-            ))}
-          </div>
-        </div>
+        <Layout
+          layout={layout}
+          overrides={overrides}
+          {...props}
+        />
       )}
     </>
   )
-}
-
-function defaultRenderKey (props) {
-  return <Key {...props} />
-}
-
-function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
-  const bbox = getLayoutBoundingRect(layout)
-  const width = bbox.max.x - bbox.min.x
-  const height = bbox.max.y - bbox.min.y
-
-  return {
-    width: `${width * scale}px`,
-    height: `${height * scale}px`,
-    margin: '10px auto',
-    ...overrides
-  }
 }
