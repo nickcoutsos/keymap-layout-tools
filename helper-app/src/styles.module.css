@@ -41,6 +41,7 @@
   font-family: monospace;
   font-size: 150%;
   border-radius: 5px;
+  box-sizing: border-box;
   color: var(--key-color-base);
   background-color: var(--key-bg-base);
   cursor: default;

@@ -12,7 +12,7 @@ import styles from './styles.module.css'
 
 function serialize (layout) {
   const lines = layout.map(line => '  ' + JSON.stringify(line))
-  return `[\n${lines.join(',\n')}]`
+  return `[\n${lines.join(',\n')}\n]`
 }
 
 function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
@@ -29,7 +29,6 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
     width: `${bbox.x * scale}px`,
     height: `${bbox.y * scale}px`,
     margin: '0 auto',
-    padding: '0 40px 40px',
     ...overrides
   }
 }
@@ -73,7 +72,7 @@ export default function App () {
             and the key ordering of your layout.
           </em>
         </p>
-        <pre>
+        <pre style={{ maxHeight: '15em', overflow: 'auto' }}>
           {(
             layout.every(key => 'row' in key && 'col' in key)
               ? renderLayout(layout, labels)
