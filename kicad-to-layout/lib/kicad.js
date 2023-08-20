@@ -2,6 +2,8 @@
  * Parse switches from a `kicad_pcb` file to generate a layout.
  * Inspired by https://gist.github.com/crides/6d12d1033368e24873b0142941311e5d
  */
+import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
+import * as modifiers from 'keymap-layout-tools/lib/modifiers.js'
 import Parse from 's-expression'
 
 /**
@@ -39,10 +41,10 @@ export function parseKicadLayout (pcbFileContents, options) {
   let layout = generateLayout(switches, options)
 
   if (options.invert) {
-    layout = flip(layout)
+    layout = modifiers.flip(layout)
   }
   if (options.mirror) {
-    layout = mirror(layout)
+    layout = modifiers.mirror(layout, 2)
   }
 
   // Rotation origins are generally weird. KLE's rotations always default to the
@@ -58,6 +60,12 @@ export function parseKicadLayout (pcbFileContents, options) {
       key.rx = key.x + .5
       key.ry = key.y + .5
     }
+  }
+
+  const bbox = getLayoutBoundingRect(layout, { keySize: 1, padding: 0 })
+  for (const key of layout) {
+    key.x -= bbox.min.x
+    key.y -= bbox.min.y
   }
 
   return layout
@@ -160,64 +168,7 @@ export function generateLayout (switches, options) {
         key.r += Math.sign(sw.angle) * 180
       }
     }
-  
+
     return [...keys, key]
   }, [])
-}
-
-/**
- * Flip keys across the Y-axis.
- *
- * Use this to create the second half of a symmetric split keyboard from one
- * the PCB data for a single side.
- *
- * @param {Array<LayoutKey>} layout
- * @returns {Array<LayoutKey>}
- */
-export function flip (layout) {
-  const maxX = Math.max(...layout.map(k => k.x))
-  const maxCol = Math.max(...layout.map(k => k.col))
-  const rows = groupByRow(layout)
-
-  return rows.flatMap(row => {
-    return row.map(key => ({
-      ...key,
-      x: maxX - key.x,
-      col: maxCol - key.col,
-      r: -key.r
-    })).reverse()
-  })
-}
-
-function groupByRow (layout) {
-  return layout.reduce((rows, key) => {
-    let row = rows.at(-1)
-    if (!row || row.at(-1).row !== key.row) {
-      row = []
-      rows.push(row)
-    }
-
-    row.push(key)
-    return rows
-  }, [])
-}
-
-export function mirror (layout) {
-  const maxX = Math.max(...layout.map(k => k.x))
-  const maxCol = Math.max(...layout.map(k => k.col))
-
-  const flipped = flip(layout)
-  const flippedRows = groupByRow(flipped)
-
-  return groupByRow(layout).flatMap((row, i) => {
-    const flippedRow = flippedRows[i]
-    return [
-      ...row,
-      ...flippedRow.map(key => ({
-        ...key,
-        x: key.x + maxX + 2,
-        col: key.col + maxCol + 2
-      }))
-    ]
-  })
 }
