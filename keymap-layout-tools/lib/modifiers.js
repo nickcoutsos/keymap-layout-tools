@@ -1,14 +1,33 @@
 import { getLayoutBoundingRect } from './geometry.js'
 
 export function toOrigin (layout) {
-  const bbox = getLayoutBoundingRect(layout)
-  return layout.map(key => ({
-    ...key,
-    x: key.x - bbox.min.x,
-    y: key.y - bbox.min.y,
-    rx: key.rx - bbox.min.x,
-    ry: key.ry - bbox.min.y
-  }))
+  const bbox = getLayoutBoundingRect(layout, { keySize: 1, padding: 0 })
+
+  return layout.map(key => {
+    const transformed = { ...key }
+
+    transformed.x = key.x - bbox.min.x
+    transformed.y = key.y - bbox.min.y
+    if ('rx' in key) transformed.rx = key.rx - bbox.min.x
+    if ('ry' in key) transformed.ry = key.ry - bbox.min.y
+
+    return transformed
+  })
+}
+
+export function setFixedPrecision (layout, precision = 2) {
+  return layout.map(layoutKey => {
+    const transformed = { ...layoutKey }
+
+    for (const prop in transformed) {
+      const value = transformed[prop]
+      if (typeof value === 'number' && Math.round(value) !== value) {
+        transformed[prop] = Number(value.toFixed(precision))
+      }
+    }
+
+    return transformed
+  })
 }
 
 /**
