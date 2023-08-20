@@ -1,28 +1,29 @@
+import classNames from 'classnames'
 import meanBy from 'lodash/meanBy.js'
 import { useCallback, useMemo, useState } from 'react'
 
-import { getKeyBoundingBox, transformKeyPolygon } from 'keymap-layout-tools/lib/geometry.js'
+import { transformKeyPolygon } from 'keymap-layout-tools/lib/geometry.js'
+import { setFixedPrecision, toOrigin } from 'keymap-layout-tools/lib/modifiers.js'
 
-import LayoutPreview from '../Common/LayoutPreview.jsx'
+import { Dialog, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
+import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
 import Key from '../Key.jsx'
 
+import { useDragSelector } from './DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
-import styles from './key.module.css'
-import classNames from 'classnames'
-import { useDragSelector } from './DragSelector.jsx'
+import keyStyles from './key.module.css'
+import styles from './reorder.module.css'
 
-const scale = 0.7
+const scale = 0.6
 
-export default function Reorder ({ layout, onUpdate, onCancel }) {
+export default function Reorder ({ layout: originalLayout, onUpdate, onCancel }) {
+  // TODO: do this somewhere else?
+  const layout = useMemo(() => setFixedPrecision(toOrigin(originalLayout)), [originalLayout])
   const [state, actions] = useReorderStore(layout)
   const [previewSelection, setPreviewSelection] = useState(null)
   const { selectionMode, selection } = state
-
-  const wrapperStyle = useMemo(() => (
-    layout && getWrapperStyle(layout, { scale })
-  ), [layout])
 
   const keyPolygons = useMemo(() => (
     layout.map(key => transformKeyPolygon(
@@ -92,10 +93,10 @@ export default function Reorder ({ layout, onUpdate, onCancel }) {
             actions.addToSelected(index)
           }
         }}
-        className={classNames({
-          [styles.selected]: selected,
-          [styles.preview]: preview,
-          [styles.previewDeselect]: previewDeselect
+        className={classNames(keyStyles.selectable, {
+          [keyStyles.selected]: selected,
+          [keyStyles.preview]: preview,
+          [keyStyles.previewDeselect]: previewDeselect
         })}
       />
     )
@@ -114,51 +115,71 @@ export default function Reorder ({ layout, onUpdate, onCancel }) {
   }, [onUpdate, state, layout])
 
   return (
-    <Modal onDismiss={onCancel}>
-      <div style={{ background: 'var(--dialog-bg)' }}>
-        <div style={{ position: 'relative', ...wrapperStyle }}>
-          <DragSelectContainer {...dragProps}>
-            <LayoutPreview
-              metadata={{ layouts: { LAYOUT: { layout } } }}
-              scale={scale}
-              renderKey={renderKey}
-            />
-          </DragSelectContainer>
+    <Modal>
+      <Dialog>
+        <DialogHeading>
+          <h2>Re-map layout grid</h2>
+        </DialogHeading>
 
-          {state.rows.map((row, i) => (
-            <RowMarker
-              key={i}
-              number={i}
-              active={selectionMode === 'rows' && selection === i}
-              onClick={e => { e.stopPropagation(); actions.selectRow(i) }}
-              onMouseEnter={() => setPreviewSelection(['rows', i])}
-              onMouseLeave={() => setPreviewSelection(null)}
-              style={{ left: 0, top: `${rowMarkerPositions[i]}px` }}
-            />
-          ))}
-          {state.columns.map((row, i) => (
-            <ColMarker
-              key={i}
-              number={i}
-              active={selectionMode === 'columns' && selection === i}
-              onClick={e => { e.stopPropagation(); actions.selectCol(i) }}
-              onMouseEnter={() => setPreviewSelection(['columns', i])}
-              onMouseLeave={() => setPreviewSelection(null)}
-              style={{ top: 0, left: `${colMarkerPositions[i]}px` }}
-            />
-          ))}
+        <DialogNote>
+          If your layout looks correct visually but the textual layout doesn't,
+          you can use this to re-assign keys to the appropriate row and column
+          values.
+        </DialogNote>
+
+        <div className={styles.gridControllerWrapper}>
+          <div className={styles.layoutWrapper} style={{ position: 'relative' }}>
+            <DragSelectContainer {...dragProps}>
+              <Layout
+                layout={layout}
+                scale={scale}
+                renderKey={renderKey}
+              />
+            </DragSelectContainer>
+
+            {state.rows.map((row, i) => (
+              <RowMarker
+                key={i}
+                number={i}
+                active={selectionMode === 'rows' && selection === i}
+                onClick={e => { e.stopPropagation(); actions.selectRow(i) }}
+                onMouseEnter={() => setPreviewSelection(['rows', i])}
+                onMouseLeave={() => setPreviewSelection(null)}
+                style={{ left: 0, top: `${rowMarkerPositions[i]}px` }}
+              />
+            ))}
+            {state.columns.map((row, i) => (
+              <ColMarker
+                key={i}
+                number={i}
+                active={selectionMode === 'columns' && selection === i}
+                onClick={e => { e.stopPropagation(); actions.selectCol(i) }}
+                onMouseEnter={() => setPreviewSelection(['columns', i])}
+                onMouseLeave={() => setPreviewSelection(null)}
+                style={{ top: 0, left: `${colMarkerPositions[i]}px` }}
+              />
+            ))}
+          </div>
+
+          <DialogNote>
+            Click on individual keys to add/remove them from the selected row or
+            column. Click and drag a region to add (or hold shift to remove) all
+            intersecting keys to the selected row/column.
+          </DialogNote>
         </div>
+
         <ReorderingActions
           state={state}
           actions={actions}
           layout={layout}
           keyCenters={keyCenters}
         />
+
         <div style={{ display: 'flex', gap: '5px', marginTop: '20px', justifyContent: 'center' }}>
           <button onClick={handleConfirm}>Okay</button>
-          <button onClick={onCancel}>Cancel</button>
+          <button style={{ background: 'none', border: 'none' }} onClick={onCancel}>Cancel</button>
         </div>
-      </div>
+      </Dialog>
     </Modal>
   )
 }
@@ -247,29 +268,13 @@ function applyToLayout (layout, { rows, columns }) {
     }), {})
   }), {})
 
-  return rows.flatMap((keys, row) => {
+  const updated = rows.flatMap((keys, row) => {
     return keys.map(key => {
       const { row: _, col: __, ...rest } = layout[key]
       const col = columnsByKey[key]
       return { row, col, ...rest }
     }).sort((a, b) => a.col - b.col)
   })
-}
 
-function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
-  const bbox = layout.map(key => getKeyBoundingBox(
-    { x: key.x, y: key.y },
-    { u: key.u || key.w || 1, h: key.h || 1 },
-    { x: key.rx, y: key.ry, a: key.r }
-  )).reduce(({ x, y }, { max }) => ({
-    x: Math.max(x, max.x),
-    y: Math.max(y, max.y)
-  }), { x: 0, y: 0 })
-
-  return {
-    width: `${bbox.x * scale}px`,
-    height: `${bbox.y * scale}px`,
-    margin: '10px auto',
-    ...overrides
-  }
+  return updated
 }

@@ -15,16 +15,20 @@ export function Marker ({ children, className, active = false, ...props }) {
 
 export function RowMarker ({ number, ...props }) {
   return (
-    <Marker {...props}>
-      Row #{number}
+    <Marker {...props} title={`Row #${number}`}>
+      {number}
     </Marker>
   )
 }
 
 export function ColMarker ({ number, className = '', ...props }) {
   return (
-    <Marker className={classNames(className, styles.vertical)} {...props}>
-      Col #{number}
+    <Marker
+      className={classNames(className, styles.vertical)}
+      title={`Column #${number}`}
+      {...props}
+    >
+      {number}
     </Marker>
   )
 }

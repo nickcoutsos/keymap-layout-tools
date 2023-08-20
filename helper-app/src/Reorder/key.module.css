@@ -11,3 +11,8 @@
 .previewDeselect {
   /* border: 2px solid var(--key-color-extreme); */
 }
+
+.selectable:hover {
+  border: 1px solid royalblue;
+  cursor: pointer;
+}

@@ -1,5 +1,5 @@
 :root {
-  --length: 75px;
+  --length: 25px;
   --width: 30px;
   --hyp: 21.21px;
 }
@@ -62,8 +62,13 @@
   transform: translate(-50%, calc(50% - 2px)) rotate(45deg)
 }
 
-.marker.active, .marker.active::after {
+.marker:hover, .marker:hover::after {
   color: royalblue;
   border-color: royalblue;
   font-weight: bold;
+}
+.marker.active, .marker.active::after {
+  color: var(--key-bg-base);
+  background-color: royalblue;
+  border-color: royalblue;
 }

@@ -1,0 +1,13 @@
+.gridControllerWrapper {
+  width: min-content;
+  padding: 45px;
+  padding-bottom: 0;
+  margin: 10px auto;
+}
+
+.layoutWrapper {
+  border: 1px solid var(--key-color-base);
+  border-radius: 2px;
+  width: fit-content;
+  height: fit-content;
+}
