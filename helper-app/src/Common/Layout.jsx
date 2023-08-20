@@ -5,7 +5,7 @@ import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
 import Key from '../Key.jsx'
 import KeyPlacer from '../KeyPlacer.jsx'
 
-export default function LayoutPreview ({ layout, scale = 0.4, overrides = {}, renderKey = defaultRenderKey }) {
+export default function Layout ({ layout, scale = 0.4, overrides = {}, renderKey = defaultRenderKey }) {
   const wrapperStyle = useMemo(() => (
     layout && getWrapperStyle(layout, { scale, overrides })
   ), [layout, scale, overrides])

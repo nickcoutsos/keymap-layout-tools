@@ -29,6 +29,15 @@ import Parse from 's-expression'
  */
 
 /**
+ * Parse kicad pcb to generate a S-Expression tree
+ * @param {String} pcbFileContents
+ * @returns {Array}
+ */
+export function parsePcbTree (pcbFileContents) {
+  return Parse(pcbFileContents)
+}
+
+/**
  * Parse kicad pcb to generate a layout
  * @param {String} pcbFileContents
  * @param {Object} options
@@ -36,7 +45,7 @@ import Parse from 's-expression'
  * @returns {Array<LayoutKey>}
  */
 export function parseKicadLayout (pcbFileContents, options) {
-  const tree = Parse(pcbFileContents)
+  const tree = parsePcbTree(pcbFileContents)
   const switches = getSwitches(tree, options)
   let layout = generateLayout(switches, options)
 

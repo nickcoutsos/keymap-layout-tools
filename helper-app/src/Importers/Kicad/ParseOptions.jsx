@@ -26,9 +26,9 @@ export default function ParseOptions ({ options, onChange }) {
       <div>
         <label>
           <input
-            name="invertX"
+            name="invert"
             type="checkbox"
-            value={options.invertX}
+            value={options.invert}
             onChange={handleChange}
           /> Flip Horizontal
         </label>
@@ -37,9 +37,9 @@ export default function ParseOptions ({ options, onChange }) {
       <div>
         <label>
           <input
-            name="mirrorX"
+            name="mirror"
             type="checkbox"
-            value={options.mirrorX}
+            value={options.mirror}
             onChange={handleChange}
           /> Mirror Horizontal
         </label>

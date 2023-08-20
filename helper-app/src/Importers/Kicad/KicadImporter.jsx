@@ -1,60 +1,33 @@
 import { useEffect, useState, useMemo } from 'react'
 
-import { parseKicadLayout } from 'kicad-to-layout'
-
+import { useKicadImporter } from './hooks.js'
 import ParseOptions from './ParseOptions.jsx'
 import styles from './styles.module.css'
 
 import FileSelect from '../../Common/FileSelect.jsx'
-import LayoutPreview from '../../Common/LayoutPreview.jsx'
-import { setFixedPrecision } from 'keymap-layout-tools/lib/modifiers.js'
+import Layout from '../../Common/Layout.jsx'
+import Key from '../../Key.jsx'
 
 export default function KicadImporter ({ onUpdate }) {
   const [contents, setContents] = useState('')
   const [options, setOptions] = useState({
-    invertX: false,
-    mirrorX: false,
+    invert: false,
+    mirror: false,
     choc: false,
     pattern: '.*'
   })
 
-  const layout = useMemo(() => {
-    if (!contents) {
-      return null
-    }
-
-    // TODO: use the individual functions to avoid re-parsing when possible
-    // TODO: parse switch labels for context when inspecting/debugging the
-    // layout preview
-    const layout = parseKicadLayout(contents, {
-      modulePattern: options.pattern,
-      invert: options.invertX,
-      mirror: options.mirrorX,
-      spacing: (
-        options.choc
-          ? { x: 18.5, y: 17.5 }
-          : { x: 19, y: 19 }
-      )
-    })
-
-    return setFixedPrecision(layout)
-  }, [contents, options])
-
-  const metadata = useMemo(() => layout && ({
-    layouts: {
-      LAYOUT: {
-        layout
-      }
-    }
-  }), [layout])
+  const { layout } = useKicadImporter(contents, options)
 
   useEffect(() => {
-    onUpdate(metadata)
-  }, [metadata, onUpdate])
-
-  const optionsStyle = !contents
-    ? { opacity: 0.5 }
-    : {}
+    onUpdate({
+      layouts: {
+        LAYOUT: {
+          layout
+        }
+      }
+    })
+  }, [layout, onUpdate])
 
   return (
     <>
@@ -67,7 +40,7 @@ export default function KicadImporter ({ onUpdate }) {
       </div>
 
       <h3>2. Options</h3>
-      <fieldset disabled={!contents} style={optionsStyle}>
+      <fieldset disabled={!contents}>
         <ParseOptions options={options} onChange={setOptions} />
       </fieldset>
 
@@ -77,7 +50,12 @@ export default function KicadImporter ({ onUpdate }) {
           ⚠️ No switches could be parsed
         </div>
       )}
-      {metadata && <LayoutPreview metadata={metadata} />}
+      {layout && (
+        <Layout
+          layout={layout}
+          overrides={{ margin: '0 auto' }}
+        />
+      )}
     </>
   )
 }
