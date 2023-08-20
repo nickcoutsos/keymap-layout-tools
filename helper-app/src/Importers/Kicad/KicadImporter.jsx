@@ -17,7 +17,23 @@ export default function KicadImporter ({ onUpdate }) {
     pattern: '.*'
   })
 
-  const { layout } = useKicadImporter(contents, options)
+  const { switches, layout: previewLayout } = useKicadImporter(contents, options)
+  const layoutWithSwitchInfo = useMemo(() => {
+    return previewLayout && previewLayout.map((key, i) => ({
+      ...key,
+      _switch: (
+        '_original' in key
+          ? switches[key._original]
+          : switches[i]
+      )
+    }))
+  }, [previewLayout, switches])
+
+  const layout = useMemo(() => previewLayout && previewLayout.map(key => {
+    const cleaned = { ...key }
+    delete cleaned._original
+    return cleaned
+  }), [previewLayout])
 
   useEffect(() => {
     onUpdate({
@@ -45,17 +61,31 @@ export default function KicadImporter ({ onUpdate }) {
       </fieldset>
 
       <h3>3. Preview</h3>
-      {layout && layout.length === 0 && (
+      {previewLayout && previewLayout.length === 0 && (
         <div className={styles.warning}>
           ⚠️ No switches could be parsed
         </div>
       )}
-      {layout && (
+      {previewLayout && (
         <Layout
-          layout={layout}
+          layout={layoutWithSwitchInfo}
           overrides={{ margin: '0 auto' }}
+          renderKey={renderSwitch}
         />
       )}
     </>
+  )
+}
+
+function renderSwitch ({ keyLayout }) {
+  return (
+    <Key
+      index={keyLayout._switch?.name}
+      keyLayout={keyLayout}
+      title={[
+        `Module/footprint label: "${keyLayout._switch?.mod}"`,
+        `Switch label: "${keyLayout._switch?.name}"`
+      ].join('\n')}
+    />
   )
 }

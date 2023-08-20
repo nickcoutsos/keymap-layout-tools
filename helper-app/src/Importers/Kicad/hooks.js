@@ -40,10 +40,10 @@ export function useKicadImporter (contents, options) {
 
     let layout = rawLayout
     if (options.invert) {
-      layout = flip(layout)
+      layout = flip(layout, { referenceOriginal: true })
     }
     if (options.mirror) {
-      layout = mirror(layout, 2)
+      layout = mirror(layout, { referenceOriginal: true, gap: 2 })
     }
 
     for (const key of layout) {

@@ -53,7 +53,7 @@ export function parseKicadLayout (pcbFileContents, options) {
     layout = modifiers.flip(layout)
   }
   if (options.mirror) {
-    layout = modifiers.mirror(layout, 2)
+    layout = modifiers.mirror(layout, { gap: 2 })
   }
 
   // Rotation origins are generally weird. KLE's rotations always default to the
@@ -113,7 +113,8 @@ export function getSwitches (tree, options) {
 
       if (fpText) {
         const sw = {
-          name: fpText[2],
+          mod: mod[1].toString(),
+          name: fpText[2].toString(),
           angle: Number(at[3] || 0),
           position: {
             x: Number(at[1]),

@@ -37,22 +37,33 @@ export function setFixedPrecision (layout, precision = 2) {
  * the PCB data for a single side.
  *
  * @param {Array<LayoutKey>} layout
+ * @param {Object} [options={}]
+ * @param {Boolean} [options.referenceOriginal=false] add reference to original key index
  * @returns {Array<LayoutKey>}
  */
-export function flip (layout) {
+export function flip (layout, { referenceOriginal = false } = {}) {
   const maxX = Math.max(...layout.map(k => k.x))
   const maxCol = Math.max(...layout.map(k => k.col))
   const rows = groupByRow(layout)
 
-  return rows.flatMap(row => {
-    return row.map(key => ({
-      ...key,
-      x: maxX - key.x - ((key.w || 1) - 1),
-      // rx: maxX - key.rx + 1 - ((key.w || 1) - 1),
-      col: maxCol - key.col,
-      r: -key.r
-    })).reverse()
-  })
+  return rows.reduce((layout, row) => ([
+    ...layout,
+    ...row.map((key, i) => {
+      const newKey = { ...key }
+      newKey.x = maxX - key.x - ((key.w || 1) - 1)
+      newKey.col = maxCol - key.col
+
+      if ('r' in key) {
+        newKey.r = -key.r
+      }
+
+      if (referenceOriginal) {
+        newKey._original = layout.length + i
+      }
+
+      return newKey
+    }).reverse()
+  ]), [])
 }
 
 function groupByRow (layout) {
@@ -68,22 +79,41 @@ function groupByRow (layout) {
   }, [])
 }
 
-export function mirror (layout, spacing = 0) {
+/**
+ * Mirror one half of a split keyboard to produce a full layout
+ *
+ * @param {Array<LayoutKey>} layout
+ * @param {Object} [options={}]
+ * @param {Number} [options.gap=0] space to leave between mirrored halves
+ * @param {Boolean} [options.referenceOriginal=false] add reference to original key index
+ * @returns {Array<LayoutKey>}
+ */
+export function mirror (layout, { gap = 0, referenceOriginal = false } = {}) {
   const maxX = Math.max(...layout.map(k => k.x))
   const maxCol = Math.max(...layout.map(k => k.col))
 
-  const flipped = flip(layout)
+  if (referenceOriginal) {
+    layout = layout.map((key, i) => ({
+      ...key, _original: i
+    }))
+  }
+
+  const flipped = flip(layout, { referenceOriginal })
   const flippedRows = groupByRow(flipped)
 
-  return groupByRow(layout).flatMap((row, i) => {
-    const flippedRow = flippedRows[i]
-    return [
-      ...row,
-      ...flippedRow.map(key => ({
-        ...key,
-        x: key.x + maxX + spacing,
-        col: key.col + maxCol + Math.ceil(spacing)
-      }))
-    ]
-  })
+  return groupByRow(layout).reduce((layout, row, i) => [
+    ...layout,
+    ...row,
+    ...flippedRows[i].map(key => {
+      const mirroredKey = { ...key }
+      mirroredKey.x = key.x + maxX + gap
+      mirroredKey.col = key.col + maxCol + Math.ceil(gap)
+
+      if (referenceOriginal) {
+        mirroredKey._original = key._original
+      }
+
+      return mirroredKey
+    })
+  ], [])
 }

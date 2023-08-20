@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import styles from './styles.module.css'
+import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 
 function Key ({ index, keyLayout, className = '', ...props }) {
   const classes = classNames(
@@ -16,8 +17,9 @@ function Key ({ index, keyLayout, className = '', ...props }) {
 }
 
 Key.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.any.isRequired
+  index: PropTypes.any.isRequired,
+  keyLayout: keyboardLayoutPropTypes.keyLayout.isRequired,
+  className: PropTypes.string
 }
 
 export default Key
