@@ -109,7 +109,7 @@ export function getSwitches (tree, options) {
   return tree
     .filter(and(
       or(nameIs('module'), nameIs('footprint')),
-      node => node[1].match(options.modulePattern || DEFUALT_MODULE_PATTERN)
+      node => node[1].match(options.modulePattern || DEFAULT_MODULE_PATTERN)
     ))
     .reduce((switches, mod) => {
       const at = mod.find(positionMatcher)
