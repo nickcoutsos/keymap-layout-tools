@@ -10,7 +10,7 @@ import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
 import Key from '../Key.jsx'
 
-import { useDragSelector } from './DragSelector.jsx'
+import { useDragSelector } from './DragSelector/DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
 import keyStyles from './key.module.css'
