@@ -10,7 +10,13 @@ import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
 import Key from '../Key.jsx'
 
-import { DragSelectContainer, useDragSelector } from './DragSelector/DragSelector.jsx'
+import {
+  DragSelectContainer,
+  DragSelectStyleSwitcher,
+  DRAG_MODE_ADD,
+  DRAG_MODE_REMOVE,
+  useDragSelector
+} from './DragSelector/DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
 import keyStyles from './key.module.css'
@@ -43,17 +49,14 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     }))
   ), [keyPolygons])
 
-  const handleDragSelect = useCallback(({ negate, intersecting }) => {
-    negate
-      ? actions.removeFromSelected(intersecting)
-      : actions.addToSelected(intersecting)
+  const handleDragSelect = useCallback(({ mode, intersections }) => {
+    mode === DRAG_MODE_REMOVE
+      ? actions.removeFromSelected(intersections)
+      : actions.addToSelected(intersections)
   }, [actions])
 
-  // TODO: Add "freeform" line selection
-  const dragProps = useDragSelector({
-    onSelect: handleDragSelect,
-    polygons: keyPolygons
-  })
+  const dragProps = useDragSelector(keyPolygons, handleDragSelect)
+  const { intersections, mode: dragMode } = dragProps
 
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
   const colMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.columns, 'x'), [keyCenters, state.columns])
@@ -68,17 +71,16 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
       ].includes(index)
     )
 
-    const intersecting = dragProps.selecting ? dragProps.intersecting : []
-    const previewDragSelect = dragProps.negate
-      ? intersecting.filter(index => group.includes(index))
-      : intersecting.filter(index => !group.includes(index))
+    const previewDragSelect = dragMode === DRAG_MODE_REMOVE
+      ? intersections.filter(index => group.includes(index))
+      : intersections.filter(index => !group.includes(index))
 
     const preview = (
-      (!dragProps.negate && previewDragSelect.includes(index)) ||
+      (dragMode === DRAG_MODE_ADD && previewDragSelect.includes(index)) ||
       (previewMarkerHover)
     )
 
-    const previewDeselect = dragProps.negate && previewDragSelect.includes(index)
+    const previewDeselect = dragMode === DRAG_MODE_REMOVE && previewDragSelect.includes(index)
 
     // TODO: Render RC(r,c) on keys for extra context
     // TODO: indicate keys without current row/col assignments
@@ -105,9 +107,8 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     state,
     actions,
     previewSelection,
-    dragProps.negate,
-    dragProps.selecting,
-    dragProps.intersecting
+    intersections,
+    dragMode
   ])
 
   const handleConfirm = useCallback(() => {
@@ -162,6 +163,8 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
               />
             </DragSelectContainer>
           </div>
+
+          <DragSelectStyleSwitcher {...dragProps} />
 
           <DialogNote>
             Click on individual keys to add/remove them from the selected row or

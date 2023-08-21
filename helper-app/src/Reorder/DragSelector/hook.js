@@ -5,15 +5,24 @@ import { bbox, bboxUnion } from 'keymap-layout-tools/lib/geometry'
 
 import {
   getRelativeAncestor,
-  getIntersectingPolygons
+  getIntersectingPolygons,
+  getIntersectingPolygonsTrail
 } from './util'
 
-export function useDragSelector ({ polygons, onSelect }) {
+export const DRAG_MODE_ADD = 'add'
+export const DRAG_MODE_REMOVE = 'remove'
+
+export const DRAG_STYLE_BOX = 'box'
+export const DRAG_STYLE_PATH = 'path'
+
+export function useDragSelector (polygons, onSelect) {
   const [state, actions] = useDragStateReducer()
   const {
-    start,
+    style,
     mode,
-    rect
+    start,
+    rect,
+    trail
   } = state
 
   const {
@@ -38,8 +47,26 @@ export function useDragSelector ({ polygons, onSelect }) {
       return []
     }
 
-    return getIntersectingPolygons(rect, polygons)
-  }, [polygons, selecting, rect])
+    return style === DRAG_STYLE_BOX
+      ? getIntersectingPolygons(rect, polygons)
+      : getIntersectingPolygonsTrail(trail, polygons)
+  }, [polygons, selecting, style, rect, trail])
+
+  const handleChangeStyle = useCallback(style => (
+    setStyle(style)
+  ), [setStyle])
+
+  const handleKeyDown = useCallback(event => {
+    if (mode === DRAG_MODE_ADD && event.shiftKey) {
+      setMode(DRAG_MODE_REMOVE)
+    }
+  }, [mode, setMode])
+
+  const handleKeyUp = useCallback(event => {
+    if (mode === DRAG_MODE_REMOVE && !event.shiftKey) {
+      setMode(DRAG_MODE_ADD)
+    }
+  }, [mode, setMode])
 
   const handleMouseDown = useCallback(event => {
     const offsetElement = getRelativeAncestor(event.target)
@@ -49,22 +76,6 @@ export function useDragSelector ({ polygons, onSelect }) {
     event.preventDefault()
     beginDrag([x, y], rect)
   }, [beginDrag])
-
-  const handleChangeMode = useCallback(style => (
-    setStyle(style)
-  ), [setStyle])
-
-  const handleKeyDown = useCallback(event => {
-    if (mode === 'add' && event.shiftKey) {
-      setMode('remove')
-    }
-  }, [mode, setMode])
-
-  const handleKeyUp = useCallback(event => {
-    if (mode === 'remove' && !event.shiftKey) {
-      setMode('add')
-    }
-  }, [mode, setMode])
 
   const handleMouseMove = useCallback(event => {
     if (start) {
@@ -78,14 +89,7 @@ export function useDragSelector ({ polygons, onSelect }) {
     }
 
     if (selecting) {
-      onSelect({
-        mode,
-        intersections,
-
-        // DEPRECATE
-        negate: mode === 'remove',
-        intersecting: intersections
-      })
+      onSelect({ mode, intersections })
     }
 
     endDrag()
@@ -109,18 +113,8 @@ export function useDragSelector ({ polygons, onSelect }) {
     boundingBox,
     selecting,
     intersections,
-    handlers: {
-      onMouseDown: handleMouseDown,
-      onMouseMove: handleMouseMove
-    },
-
-    // DEPRECATED
-    // TODO: remove
     onMouseDown: handleMouseDown,
-    onMouseMove: handleMouseMove,
-    onChangeMode: handleChangeMode,
-    intersecting: intersections,
-    negate: mode === 'remove'
+    onChangeStyle: handleChangeStyle
   }
 }
 
@@ -146,8 +140,8 @@ function useDragStateReducer () {
 
 function createInitialState () {
   return {
-    style: 'box',
-    mode: 'add',
+    style: DRAG_STYLE_BOX,
+    mode: DRAG_MODE_ADD,
     start: null,
     trail: null,
     rect: null,
@@ -166,7 +160,10 @@ function reducer (state, action) {
     case 'begin':
       return {
         ...state,
-        start: action.startPoint,
+        start: [
+          action.startPoint[0] - action.offsetRect.left,
+          action.startPoint[1] - action.offsetRect.top
+        ],
         offsetRect: action.offsetRect,
         trail: []
       }
@@ -197,12 +194,12 @@ function getDragRect (state, action) {
   const { clientX, clientY } = action
   const [x0, y0] = start
 
-  const x = clamp(clientX, offsetRect.left, offsetRect.right)
-  const y = clamp(clientY, offsetRect.top, offsetRect.bottom)
+  const x = clamp(clientX, offsetRect.left, offsetRect.right) - offsetRect.left
+  const y = clamp(clientY, offsetRect.top, offsetRect.bottom) - offsetRect.top
 
   return [
-    [Math.min(x, x0) - offsetRect.left, Math.min(y, y0) - offsetRect.top],
-    [Math.max(x, x0) - offsetRect.left, Math.max(y, y0) - offsetRect.top]
+    [Math.min(x, x0), Math.min(y, y0)],
+    [Math.max(x, x0), Math.max(y, y0)]
   ]
 }
 

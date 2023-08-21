@@ -2,11 +2,18 @@ import classNames from 'classnames'
 import { useCallback } from 'react'
 
 import styles from './dragSelector.module.css'
+import { DRAG_MODE_REMOVE, DRAG_STYLE_BOX, DRAG_STYLE_PATH } from './hook.js'
 
-export { useDragSelector } from './hook.js'
+export {
+  DRAG_MODE_ADD,
+  DRAG_MODE_REMOVE,
+  DRAG_STYLE_BOX,
+  DRAG_STYLE_PATH,
+  useDragSelector
+} from './hook.js'
 
 export function DragSelectContainer (props) {
-  const { selecting, trail, children, onMouseDown } = props
+  const { style, selecting, children, onMouseDown } = props
 
   return (
     <div
@@ -17,26 +24,26 @@ export function DragSelectContainer (props) {
       )}
     >
       {children}
-      {selecting && <DragBox {...props} />}
-      {/* {trail && <DragTrail {...props} />} */}
+      {selecting && style === DRAG_STYLE_BOX && <DragBox {...props} />}
+      {selecting && style === DRAG_STYLE_PATH && <DragTrail {...props} />}
     </div>
   )
 }
 
-export function DragSelectModeSwitcher ({ mode, onChangeMode }) {
+export function DragSelectStyleSwitcher ({ style, onChangeStyle }) {
   const handleChange = useCallback(event => {
-    onChangeMode(event.target.value)
-  }, [onChangeMode])
+    onChangeStyle(event.target.value)
+  }, [onChangeStyle])
 
   return (
     <div>
       <p>
-        Region select mode:
+        Region select style:
         <label>
           <input
             type="radio"
-            name="drag-select-mode"
-            checked={mode === 'box'}
+            name="drag-select-style"
+            checked={style === DRAG_STYLE_BOX}
             onChange={handleChange}
             value="box"
           /> Box
@@ -44,8 +51,8 @@ export function DragSelectModeSwitcher ({ mode, onChangeMode }) {
         <label>
           <input
             type="radio"
-            name="drag-select-mode"
-            checked={mode === 'path'}
+            name="drag-select-style"
+            checked={style === DRAG_STYLE_PATH}
             onChange={handleChange}
             value="path"
           /> Freehand
@@ -56,14 +63,14 @@ export function DragSelectModeSwitcher ({ mode, onChangeMode }) {
 }
 
 function DragBox (props) {
-  const { negate, rect: [min, max] } = props
+  const { mode, rect: [min, max] } = props
   const width = Math.abs(min[0] - max[0]) + 'px'
   const height = Math.abs(min[1] - max[1]) + 'px'
 
   return (
     <div className={classNames(
       styles.overlay,
-      { [styles.negate]: negate }
+      { [styles.negate]: mode === DRAG_MODE_REMOVE }
     )} style={{
       position: 'absolute',
       top: min[1] + 'px',
@@ -75,18 +82,31 @@ function DragBox (props) {
 }
 
 function DragTrail (props) {
-  const { start, trail, boundingBox, offset } = props
+  const { start, trail, boundingBox } = props
   const path = [
-    `M ${start[0] - offset[0]} ${start[1] - offset[1]}`,
+    `M ${start[0]} ${start[1]}`,
     ...trail.map(([x, y]) => `L ${x} ${y}`)
   ].join('\n')
 
   const viewBox = `0 0 ${boundingBox.max.x} ${boundingBox.max.y}`
 
   return (
-    <div style={{ position: 'absolute', pointerEvents: 'none', top: 0, left: 0, width: '100%', height: '100%' }}>
+    <div style={{
+      position: 'absolute',
+      pointerEvents: 'none',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%'
+    }}>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox={viewBox}>
-        <path fill="none" stroke="royalblue" strokeWidth="2" d={path} />
+        <path
+          fill="none"
+          stroke="royalblue"
+          strokeWidth="2"
+          strokeDasharray="4 2"
+          d={path}
+        />
       </svg>
     </div>
   )
