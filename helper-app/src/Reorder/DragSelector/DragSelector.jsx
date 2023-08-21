@@ -56,7 +56,9 @@ export function DragSelectModeSwitcher ({ mode, onChangeMode }) {
 }
 
 function DragBox (props) {
-  const { negate, rect, size } = props
+  const { negate, rect: [min, max] } = props
+  const width = Math.abs(min[0] - max[0]) + 'px'
+  const height = Math.abs(min[1] - max[1]) + 'px'
 
   return (
     <div className={classNames(
@@ -64,10 +66,10 @@ function DragBox (props) {
       { [styles.negate]: negate }
     )} style={{
       position: 'absolute',
-      top: rect[0][1] + 'px',
-      left: rect[0][0] + 'px',
-      width: size[0] + 'px',
-      height: size[1] + 'px'
+      top: min[1] + 'px',
+      left: min[0] + 'px',
+      width,
+      height
     }} />
   )
 }
