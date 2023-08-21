@@ -10,7 +10,7 @@ import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
 import Key from '../Key.jsx'
 
-import { useDragSelector } from './DragSelector/DragSelector.jsx'
+import { DragSelectContainer, useDragSelector } from './DragSelector/DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
 import keyStyles from './key.module.css'
@@ -50,7 +50,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
   }, [actions])
 
   // TODO: Add "freeform" line selection
-  const [dragProps, DragSelectContainer] = useDragSelector({
+  const dragProps = useDragSelector({
     onSelect: handleDragSelect,
     polygons: keyPolygons
   })
