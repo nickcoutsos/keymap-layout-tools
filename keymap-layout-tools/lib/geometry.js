@@ -61,19 +61,7 @@ export function transformKeyPolygon (position, size, rotation, options = {}) {
 }
 
 export function getKeyBoundingBox (position, size, rotation, options = {}) {
-  const transformed = transformKeyPolygon(position, size, rotation, options)
-  const xValues = map(transformed, 'x')
-  const yValues = map(transformed, 'y')
-  const min = {
-    x: Math.min(...xValues),
-    y: Math.min(...yValues)
-  }
-  const max = {
-    x: Math.max(...xValues),
-    y: Math.max(...yValues)
-  }
-
-  return { min, max }
+  return bbox(transformKeyPolygon(position, size, rotation, options))
 }
 
 /**
@@ -108,7 +96,22 @@ export function getLayoutBoundingRect (layout, options = {}) {
   })
 }
 
-function bboxUnion (a, b) {
+export function bbox (polygon) {
+  const xValues = map(polygon, 'x')
+  const yValues = map(polygon, 'y')
+  const min = {
+    x: Math.min(...xValues),
+    y: Math.min(...yValues)
+  }
+  const max = {
+    x: Math.max(...xValues),
+    y: Math.max(...yValues)
+  }
+
+  return { min, max }
+}
+
+export function bboxUnion (a, b) {
   return {
     min: {
       x: Math.min(a.min.x, b.min.x),

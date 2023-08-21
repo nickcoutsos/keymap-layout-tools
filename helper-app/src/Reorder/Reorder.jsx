@@ -131,14 +131,6 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
 
         <div className={styles.gridControllerWrapper}>
           <div className={styles.layoutWrapper} style={{ position: 'relative' }}>
-            <DragSelectContainer {...dragProps}>
-              <Layout
-                layout={layout}
-                scale={scale}
-                renderKey={renderKey}
-              />
-            </DragSelectContainer>
-
             {state.rows.map((row, i) => (
               <RowMarker
                 key={i}
@@ -161,6 +153,14 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
                 style={{ top: 0, left: `${colMarkerPositions[i]}px` }}
               />
             ))}
+
+            <DragSelectContainer {...dragProps}>
+              <Layout
+                layout={layout}
+                scale={scale}
+                renderKey={renderKey}
+              />
+            </DragSelectContainer>
           </div>
 
           <DialogNote>

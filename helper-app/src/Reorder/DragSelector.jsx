@@ -1,13 +1,13 @@
 import classNames from 'classnames'
 import clamp from 'lodash/clamp.js'
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { bbox, bboxUnion } from 'keymap-layout-tools/lib/geometry'
 
 import styles from './dragSelector.module.css'
 
 function DragSelectContainer (props) {
-  const { onMouseDown } = props
-  const { selecting, negate, rect, size } = props
-  const { children } = props
+  const { selecting, trail, children, onMouseDown } = props
 
   return (
     <div
@@ -18,24 +18,87 @@ function DragSelectContainer (props) {
       )}
     >
       {children}
-      {selecting && (
-        <div className={classNames(
-          styles.overlay,
-          { [styles.negate]: negate }
-        )} style={{
-          position: 'absolute',
-          top: rect[0][1] + 'px',
-          left: rect[0][0] + 'px',
-          width: size[0] + 'px',
-          height: size[1] + 'px'
-        }} />
-      )}
+      {selecting && <DragBox {...props} />}
+      {/* {trail && <DragTrail {...props} />} */}
+    </div>
+  )
+}
+
+export function DragSelectModeSwitcher ({ mode, onChangeMode }) {
+  const handleChange = useCallback(event => {
+    onChangeMode(event.target.value)
+  }, [onChangeMode])
+
+  return (
+    <div>
+      <p>
+        Region select mode:
+        <label>
+          <input
+            type="radio"
+            name="drag-select-mode"
+            checked={mode === 'box'}
+            onChange={handleChange}
+            value="box"
+          /> Box
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="drag-select-mode"
+            checked={mode === 'path'}
+            onChange={handleChange}
+            value="path"
+          /> Freehand
+        </label>
+      </p>
+    </div>
+  )
+}
+
+function DragBox (props) {
+  const { negate, rect, size } = props
+
+  return (
+    <div className={classNames(
+      styles.overlay,
+      { [styles.negate]: negate }
+    )} style={{
+      position: 'absolute',
+      top: rect[0][1] + 'px',
+      left: rect[0][0] + 'px',
+      width: size[0] + 'px',
+      height: size[1] + 'px'
+    }} />
+  )
+}
+
+function DragTrail (props) {
+  const { start, trail, boundingBox, offset } = props
+  const path = [
+    `M ${start[0] - offset[0]} ${start[1] - offset[1]}`,
+    ...trail.map(([x, y]) => `L ${x} ${y}`)
+  ].join('\n')
+
+  const viewBox = `0 0 ${boundingBox.max.x} ${boundingBox.max.y}`
+
+  return (
+    <div style={{ position: 'absolute', pointerEvents: 'none', top: 0, left: 0, width: '100%', height: '100%' }}>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox={viewBox}>
+        <path fill="none" stroke="royalblue" strokeWidth="2" d={path} />
+      </svg>
     </div>
   )
 }
 
 export function useDragSelector ({ polygons, onSelect }) {
-  const [state, setState] = useState({})
+  const [state, setState] = useState({
+    mode: 'box'
+  })
+
+  const boundingBox = useMemo(() => {
+    return polygons.map(bbox).reduce(bboxUnion)
+  }, [polygons])
 
   const handleMouseDown = useCallback(event => {
     const offsetElement = getRelativeAncestor(event.target)
@@ -45,11 +108,16 @@ export function useDragSelector ({ polygons, onSelect }) {
     event.preventDefault()
     setState({
       start: [x, y],
+      trail: [],
       intersecting: [],
       offset: [rect.left, rect.top],
       offsetRect: rect
     })
   }, [setState])
+
+  const handleChangeMode = useCallback(mode => (
+    setState(state => ({ ...state, mode }))
+  ), [setState])
 
   const handleKeyDown = useCallback(event => {
     if (!state.selecting || event.repeat || !event.shiftKey) {
@@ -93,6 +161,7 @@ export function useDragSelector ({ polygons, onSelect }) {
       negate: shiftKey || altKey,
       selecting: size[0] > 3 || size[1] > 3,
       intersecting: getIntersectingPolygons(rect, polygons),
+      trail: [...state.trail, [x - offset[0], y - offset[1]]],
       rect,
       size
     }))
@@ -126,8 +195,10 @@ export function useDragSelector ({ polygons, onSelect }) {
 
   return [{
     ...state,
+    boundingBox,
     onMouseDown: handleMouseDown,
-    onMouseMove: handleMouseMove
+    onMouseMove: handleMouseMove,
+    onChangeMode: handleChangeMode
   }, DragSelectContainer]
 }
 
@@ -154,6 +225,26 @@ function getIntersectingPolygons (rect, polygons) {
     if (
       points.some(point => bboxContainsPoint(rect, point)) ||
       segmentsFromPoly(points).some(a => rectSegments.some(b => lineSegmentsIntersect(a, b)))
+    ) {
+      acc.push(i)
+    }
+    return acc
+  }, [])
+}
+
+function getIntersectingPolygonsTrail (trail, polygons) {
+  const trailSegments = trail
+    .map(([x, y]) => ({ x, y }))
+    .reduce((segments, point, i, arr) => {
+      if (i < arr.length - 1) {
+        segments.push([point, arr[i + 1]])
+      }
+      return segments
+    }, [])
+
+  return polygons.reduce((acc, points, i) => {
+    if (
+      segmentsFromPoly(points).some(a => trailSegments.some(b => lineSegmentsIntersect(a, b)))
     ) {
       acc.push(i)
     }
