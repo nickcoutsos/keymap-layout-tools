@@ -92,7 +92,6 @@ export function parseKicadLayout (pcbFileContents, options) {
  * @returns {Array<ParsedSwitch>}
  */
 export function getSwitches (tree, options) {
-  const getSwitchNum = sw => Number(sw.name.match(/^SW?(\d+)/)?.[1])
   const and = (...predicates) => value => predicates.every(predicate => predicate(value))
   const or = (...predicates) => value => predicates.some(predicate => predicate(value))
 
@@ -136,7 +135,6 @@ export function getSwitches (tree, options) {
 
       return switches
     }, [])
-    .sort((a, b) => getSwitchNum(a) - getSwitchNum(b))
 }
 
 /**
