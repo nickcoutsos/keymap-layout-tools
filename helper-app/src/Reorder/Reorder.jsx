@@ -1,5 +1,7 @@
 import classNames from 'classnames'
 import meanBy from 'lodash/meanBy.js'
+import sortBy from 'lodash/sortBy.js'
+import times from 'lodash/times.js'
 import { useCallback, useMemo, useState } from 'react'
 
 import { transformKeyPolygon } from 'keymap-layout-tools/lib/geometry.js'
@@ -26,6 +28,8 @@ const scale = 0.6
 
 export default function Reorder ({ layout: originalLayout, onUpdate, onCancel }) {
   // TODO: do this somewhere else?
+  // TODO: add a little padding to this representation of the layout
+  //       (would also need to add it to thinks like drag select container)
   const layout = useMemo(() => setFixedPrecision(toOrigin(originalLayout)), [originalLayout])
   const [state, actions] = useReorderStore(layout)
   const [previewSelection, setPreviewSelection] = useState(null)
@@ -60,6 +64,8 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
 
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
   const colMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.columns, 'x'), [keyCenters, state.columns])
+  const keyAssignments = useMemo(() => getKeyAssignments(layout, { rows: state.rows, columns: state.columns }), [layout, state.rows, state.columns])
+  const isComplete = useMemo(() => keyAssignments.every(([row, col]) => row !== null && col !== null), [keyAssignments])
 
   const renderKey = useCallback(props => {
     const { index } = props
@@ -81,13 +87,14 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     )
 
     const previewDeselect = dragMode === DRAG_MODE_REMOVE && previewDragSelect.includes(index)
+    const [assignedRow, assignedCol] = keyAssignments[index] || [null, null]
+    const label = `(${assignedRow ?? '_'},${assignedCol ?? '_'})`
 
-    // TODO: Render RC(r,c) on keys for extra context
-    // TODO: indicate keys without current row/col assignments
     // TODO: keyboard shortcuts for next/prev/add group
     return (
       <Key
         {...props}
+        index={label}
         onClick={event => {
           event.stopPropagation()
           if (selected) {
@@ -106,16 +113,16 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
   }, [
     state,
     actions,
+    keyAssignments,
     previewSelection,
     intersections,
     dragMode
   ])
 
   const handleConfirm = useCallback(() => {
-    const { rows, columns } = state
-    const updatedLayout = applyToLayout(layout, { rows, columns })
+    const updatedLayout = applyToLayout(originalLayout, keyAssignments)
     onUpdate(updatedLayout)
-  }, [onUpdate, state, layout])
+  }, [onUpdate, keyAssignments, originalLayout])
 
   return (
     <Modal>
@@ -181,7 +188,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
         />
 
         <div style={{ display: 'flex', gap: '5px', marginTop: '20px', justifyContent: 'center' }}>
-          <button onClick={handleConfirm}>Okay</button>
+          <button disabled={!isComplete} onClick={handleConfirm}>Okay</button>
           <button style={{ background: 'none', border: 'none' }} onClick={onCancel}>Cancel</button>
         </div>
       </Dialog>
@@ -204,11 +211,11 @@ function ReorderingActions ({ state, actions, keyCenters }) {
       tooltip: 'Remove all but one row/col and remove all key assignments',
       handler: actions.clear
     },
-    {
-      text: 'Re-order',
-      tooltip: 'Order rows and columns by the average key positions on their respective axes',
-      handler: () => actions.reorder(keyCenters)
-    },
+    // {
+    //   text: 'Re-order',
+    //   tooltip: 'Order rows and columns by the average key positions on their respective axes',
+    //   handler: () => actions.reorder(keyCenters)
+    // },
     {
       text: `+ ${resourceName} after selected`,
       tooltip: `Insert a new ${resourceName} group after the currently selected ${resourceName}`,
@@ -280,21 +287,28 @@ function getMarkerPositions (keyCenters, groups, axis) {
   return positions
 }
 
-function applyToLayout (layout, { rows, columns }) {
-  const columnsByKey = columns.reduce((keys, group, i) => ({
-    ...keys,
-    ...group.reduce((keys, key) => ({
-      ...keys, [key]: i
-    }), {})
-  }), {})
+function getKeyAssignments (layout, { rows, columns }) {
+  const keyAssignments = times(layout.length, () => [null, null])
 
-  const updated = rows.flatMap((keys, row) => {
-    return keys.map(key => {
-      const { row: _, col: __, ...rest } = layout[key]
-      const col = columnsByKey[key]
-      return { row, col, ...rest }
-    }).sort((a, b) => a.col - b.col)
+  columns.forEach((keys, col) => {
+    keys.forEach(key => {
+      keyAssignments[key][1] = col
+    })
+  })
+  rows.forEach((keys, row) => {
+    keys.forEach(key => {
+      keyAssignments[key][0] = row
+    })
   })
 
-  return updated
+  return keyAssignments
+}
+
+function applyToLayout (layout, keyAssignments) {
+  const updated = layout.map(({ row: _, col: __, ...rest }, i) => {
+    const [row, col] = keyAssignments[i]
+    return { row, col, ...rest }
+  })
+
+  return sortBy(updated, ['row', 'col'])
 }

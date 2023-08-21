@@ -66,6 +66,14 @@ export function flip (layout, { referenceOriginal = false } = {}) {
   ]), [])
 }
 
+/**
+ * Group a layout's keys by their `row` property.
+ *
+ * This assumes that keys are already in ascending order of `row`.
+ *
+ * @param {Array<LayoutKey>} layout
+ * @returns {Array<Array<LayoutKey>>}
+ */
 function groupByRow (layout) {
   return layout.reduce((rows, key) => {
     let row = rows.at(-1)
