@@ -14,14 +14,16 @@ export function useReorderStore (layout) {
   const reorder = useCallback(keyCenters => dispatch({ type: 'REORDER', keyCenters }), [dispatch])
   const addGroup = useCallback((afterSelected = false) => dispatch({ type: 'ADD_GROUP', afterSelected }), [dispatch])
   const removeGroup = useCallback(() => dispatch({ type: 'REMOVE_GROUP' }), [dispatch])
+  const nextGroup = useCallback(() => dispatch({ type: 'NEXT_GROUP' }), [dispatch])
+  const prevGroup = useCallback(() => dispatch({ type: 'PREV_GROUP' }), [dispatch])
   const selectRow = useCallback(index => dispatch({ type: 'SELECT_ROW', index }), [dispatch])
   const selectCol = useCallback(index => dispatch({ type: 'SELECT_COL', index }), [dispatch])
   const addToSelected = useCallback(index => dispatch({ type: 'ADD_TO_SELECTED', index }), [dispatch])
   const removeFromSelected = useCallback(index => dispatch({ type: 'REMOVE_FROM_SELECTED', index }), [dispatch])
 
   const actions = useMemo(
-    () => ({ reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup }),
-    [reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup]
+    () => ({ reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup, nextGroup, prevGroup }),
+    [reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup, nextGroup, prevGroup]
   )
 
   return [state, actions]
@@ -82,6 +84,22 @@ function reducer (state, action) {
           ...state[state.selectionMode].slice(0, state.selection),
           ...state[state.selectionMode].slice(state.selection + 1)
         ]
+      }
+
+    case 'NEXT_GROUP':
+      return {
+        ...state,
+        selection: state.selection < state[state.selectionMode].length - 1
+          ? state.selection + 1
+          : 0
+      }
+
+    case 'PREV_GROUP':
+      return {
+        ...state,
+        selection: state.selection === 0
+          ? state[state.selectionMode].length - 1
+          : state.selection - 1
       }
 
     case 'SELECT_COL':

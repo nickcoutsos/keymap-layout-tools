@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import meanBy from 'lodash/meanBy.js'
 import sortBy from 'lodash/sortBy.js'
 import times from 'lodash/times.js'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { transformKeyPolygon } from 'keymap-layout-tools/lib/geometry.js'
 import { setFixedPrecision, toOrigin } from 'keymap-layout-tools/lib/modifiers.js'
@@ -59,6 +59,17 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
       : actions.addToSelected(intersections)
   }, [actions])
 
+  useEffect(() => {
+    function handleKey (event) {
+      (event.key === 'f' || event.key === 'j') && actions.nextGroup();
+      (event.key === 'd' || event.key === 'k') && actions.prevGroup();
+      (event.key === 'g' || event.key === 'h') && actions.addGroup()
+    }
+
+    document.body.addEventListener('keydown', handleKey)
+    return () => document.body.removeEventListener('keydown', handleKey)
+  }, [actions])
+
   const dragProps = useDragSelector(keyPolygons, handleDragSelect)
   const { intersections, mode: dragMode } = dragProps
 
@@ -90,7 +101,6 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     const [assignedRow, assignedCol] = keyAssignments[index] || [null, null]
     const label = `(${assignedRow ?? '_'},${assignedCol ?? '_'})`
 
-    // TODO: keyboard shortcuts for next/prev/add group
     return (
       <Key
         {...props}
