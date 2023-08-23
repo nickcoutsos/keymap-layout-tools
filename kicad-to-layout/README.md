@@ -1,5 +1,7 @@
 # Kicad-to-layout
 
+
+
 This is a small javascript utility to parse a `.kicad_pcb` file to get a list of
 switch locations and orientations, and generate a layout suitable for rendering
 with other tools in this repo.
@@ -12,6 +14,9 @@ big _s-expression_ trees so it seemed better to have a simple generic parser
 that I can query with as much specificity as needed.
 
 ## Usage
+
+_In addition to the CLI you can also use it interactively via the Keymap Layout
+Tools [helper app](https://nickcoutsos.github.io/keymap-layout-tools/)._
 
 ```
 node ./bin/kicad-to-layout.js
