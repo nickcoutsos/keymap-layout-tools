@@ -109,15 +109,21 @@ export default function Code ({ value, onChange }) {
 
   const handleReorderedLayout = useCallback(layout => {
     setState(state => {
-      let parsed = layout
+      const original = state.parsed
+      let updated = layout
 
-      if (!isRawLayout(state.parsed)) {
-        parsed = {
-          ...state.parsed,
+      if (!isRawLayout(original)) {
+        const defaultLayout = Object.keys(original.layouts)[0]
+        const selectedLayout = state.selectedLayout in original.layouts
+          ? state.selectedLayout
+          : defaultLayout
+
+        updated = {
+          ...original,
           layouts: {
-            ...state.parsed.layouts,
-            [state.selectedLayout]: {
-              ...state.parsed.layouts[state.selectedLayout],
+            ...original.layouts,
+            [selectedLayout]: {
+              ...original.layouts[selectedLayout],
               layout
             }
           }
@@ -126,8 +132,8 @@ export default function Code ({ value, onChange }) {
 
       return {
         ...state,
-        parsed,
-        text: formatMetadata(parsed)
+        parsed: updated,
+        text: formatMetadata(updated)
       }
     })
     setShowReorderDialog(false)
