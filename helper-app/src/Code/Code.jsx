@@ -108,13 +108,28 @@ export default function Code ({ value, onChange }) {
   }, [setState])
 
   const handleReorderedLayout = useCallback(layout => {
-    // TODO: handle updating specific layout in metadata collection
-    setState(state => ({
-      ...state,
-      parsed: layout,
-      selectedLayout: null,
-      text: formatMetadata(layout)
-    }))
+    setState(state => {
+      let parsed = layout
+
+      if (!isRawLayout(state.parsed)) {
+        parsed = {
+          ...state.parsed,
+          layouts: {
+            ...state.parsed.layouts,
+            [state.selectedLayout]: {
+              ...state.parsed.layouts[state.selectedLayout],
+              layout
+            }
+          }
+        }
+      }
+
+      return {
+        ...state,
+        parsed,
+        text: formatMetadata(parsed)
+      }
+    })
     setShowReorderDialog(false)
   }, [setState, setShowReorderDialog])
 
@@ -146,13 +161,6 @@ export default function Code ({ value, onChange }) {
         />
       )}
       <div className={styles.actions}>
-        <button onClick={handleFormat}>Format</button>
-        {isRawLayout(parsed) && (
-          <button onClick={handleGenerateMetadata}>
-            Generate metadata
-          </button>
-        )}
-        <button onClick={() => setShowReorderDialog(true)}>Re-order</button>
         {layouts.length > 1 && (
           <select value={selectedLayout} onChange={handleSelectLayout}>
             {layouts.map((name, i) => (
@@ -160,6 +168,13 @@ export default function Code ({ value, onChange }) {
             ))}
           </select>
         )}
+        <button onClick={handleFormat}>Format</button>
+        {isRawLayout(parsed) && (
+          <button onClick={handleGenerateMetadata}>
+            Generate metadata
+          </button>
+        )}
+        <button onClick={() => setShowReorderDialog(true)}>Re-order</button>
         <button onClick={() => setShowImporterDialog(true)}>
           Import...
         </button>

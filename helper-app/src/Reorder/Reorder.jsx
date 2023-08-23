@@ -315,9 +315,9 @@ function getKeyAssignments (layout, { rows, columns }) {
 }
 
 function applyToLayout (layout, keyAssignments) {
-  const updated = layout.map(({ row: _, col: __, ...rest }, i) => {
+  const updated = layout.map(({ label, row: _, col: __, ...rest }, i) => {
     const [row, col] = keyAssignments[i]
-    return { row, col, ...rest }
+    return Object.assign({}, label && { label }, { row, col }, rest)
   })
 
   return sortBy(updated, ['row', 'col'])
