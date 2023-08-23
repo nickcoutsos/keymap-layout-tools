@@ -3,7 +3,9 @@ import { useMemo } from 'react'
 import {
   parsePcbTree,
   getSwitches,
-  generateLayout
+  generateLayout,
+  SPACING_CHOC,
+  SPACING_MX
 } from 'kicad-to-layout'
 
 import {
@@ -14,13 +16,6 @@ import {
 } from 'keymap-layout-tools/lib/modifiers.js'
 
 export function useKicadImporter (contents, options) {
-  // TODO: define "presets" in kicad module
-  const spacing = useMemo(() => (
-    options.choc
-      ? { x: 18.5, y: 17.5 }
-      : { x: 19, y: 19 }
-  ), [options.choc])
-
   const tree = useMemo(() => (
     contents && parsePcbTree(contents)
   ), [contents])
@@ -31,6 +26,12 @@ export function useKicadImporter (contents, options) {
       switchPattern: options.switchPattern
     })
   ), [tree, options.modulePattern, options.switchPattern])
+
+  const spacing = useMemo(() => (
+    options.choc
+      ? SPACING_CHOC
+      : SPACING_MX
+  ), [options.choc])
 
   const rawLayout = useMemo(() => (
     switches && generateLayout(switches, { spacing })
