@@ -15,7 +15,7 @@ export function toOrigin (layout) {
   })
 }
 
-export function setFixedPrecision (layout, precision = 2) {
+export function setFixedPrecision (layout, precision = 3) {
   return layout.map(layoutKey => {
     const transformed = { ...layoutKey }
 

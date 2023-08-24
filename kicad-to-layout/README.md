@@ -72,13 +72,41 @@ I don't work with PCBs so I don't know of all the nuance and conventions people
 use when designing keyboards. This script is a good way to get started with some
 layout data, but expect to manually tweak the results afterwards.
 
-## Known issues
+## Limitations
 
-- Rotation is complicated in a number of ways
-- Key sizing is not currently takend into consideration
-- Switch modules are often defined in arbitrary order which means this may not
-  produce a layout that you can just use with `keymap-editor` or `keymap-drawer`
-- Much more, this is a very basic implementation right now.
+**Rotation**
+
+These are complicated enough already, but in this case there's more because the
+rotation origin in Kicad is expressed as the key center (or the switch, anyway)
+while compatibility with QMK/KLE layouts means origins should default to the
+key's top-left corner.
+
+Worse still, Kicad doesn't appear to have a concept of "grouping" transforms (or
+if it does, it doesn't seem to be used). This means that each key in a thumb
+cluster or splayed column is individually positioned and rotated about its own
+rotation origin. This is an opportunity for numerical inaccuracies to build up
+and cause keys to appear misaligned. The simple solution is to store more
+significant digits at the cost of readability.
+
+**Sizing**
+
+Key sizing is not currently takend into consideration. PCBs represent switches
+rather than keycaps so those dimensions aren't factored in like rotations are.
+
+*Some* PCBs may imply a key size used for a given switch but this isn't any kind
+of well-defined rule and would probably need to support a variety of patterns.
+For now this will have to be corrected after import (do keep in mind the origin
+issue noted above).
+
+**Ordering**
+
+Switch modules are often defined in arbitrary order which means this may not
+produce a layout that you can just use with `keymap-editor` or `keymap-drawer`.
+
+I'd love to automate fixes for this but different layouts -- particularly those
+with extreme column stagger or inconsistent numbers of keys per-column -- can
+make this impossible. For now the best option is to use the helper web app with
+the new _Re-order_ feature to map each key to the appropriate row and column.
 
 
 [crides]:https://github.com/crides
