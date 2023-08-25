@@ -10,7 +10,7 @@ export const DEFAULT_MODULE_PATTERN = '.*'
 export const DEFAULT_SWITCH_PATTERN = '^(S(WL?)?|MX|K.+?)\\d+'
 
 export const SPACING_MX = { x: 19, y: 19 }
-export const SPACING_CHOC = { x: 18.5, y: 17.5 }
+export const SPACING_CHOC = { x: 18, y: 17 }
 
 /**
  * @typedef {Object} LayoutKey
