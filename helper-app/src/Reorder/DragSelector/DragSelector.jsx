@@ -2,18 +2,20 @@ import classNames from 'classnames'
 import { useCallback } from 'react'
 
 import styles from './dragSelector.module.css'
-import { DRAG_MODE_REMOVE, DRAG_STYLE_BOX, DRAG_STYLE_PATH } from './hook.js'
+import { DragContext, DRAG_MODE_REMOVE, DRAG_STYLE_BOX, DRAG_STYLE_PATH } from './hook.js'
 
 export {
   DRAG_MODE_ADD,
   DRAG_MODE_REMOVE,
   DRAG_STYLE_BOX,
   DRAG_STYLE_PATH,
+  useDragContext,
   useDragSelector
 } from './hook.js'
 
 export function DragSelectContainer (props) {
   const { style, selecting, children, onMouseDown } = props
+  const { mode, intersections } = props
 
   return (
     <div
@@ -23,9 +25,11 @@ export function DragSelectContainer (props) {
         { [styles.selecting]: selecting }
       )}
     >
-      {children}
-      {selecting && style === DRAG_STYLE_BOX && <DragBox {...props} />}
-      {selecting && style === DRAG_STYLE_PATH && <DragTrail {...props} />}
+      <DragContext.Provider value={{ dragMode: mode, intersections }}>
+        {children}
+        {selecting && style === DRAG_STYLE_BOX && <DragBox {...props} />}
+        {selecting && style === DRAG_STYLE_PATH && <DragTrail {...props} />}
+      </DragContext.Provider>
     </div>
   )
 }

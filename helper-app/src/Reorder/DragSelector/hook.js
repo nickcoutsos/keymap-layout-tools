@@ -1,5 +1,12 @@
 import clamp from 'lodash/clamp.js'
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer
+} from 'react'
 
 import { bbox, bboxUnion } from 'keymap-layout-tools/lib/geometry'
 
@@ -14,6 +21,12 @@ export const DRAG_MODE_REMOVE = 'remove'
 
 export const DRAG_STYLE_BOX = 'box'
 export const DRAG_STYLE_PATH = 'path'
+
+export const DragContext = createContext({})
+
+export function useDragContext () {
+  return useContext(DragContext)
+}
 
 export function useDragSelector (polygons, onSelect) {
   const [state, actions] = useDragStateReducer()

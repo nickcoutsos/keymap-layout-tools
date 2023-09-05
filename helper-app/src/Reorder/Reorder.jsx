@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import meanBy from 'lodash/meanBy.js'
 import sortBy from 'lodash/sortBy.js'
 import times from 'lodash/times.js'
@@ -10,19 +9,18 @@ import { setFixedPrecision, toOrigin } from 'keymap-layout-tools/lib/modifiers.j
 import { Dialog, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
 import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
-import Key from '../Key.jsx'
+import { ReorderContext } from './Context.js'
 
 import {
   DragSelectContainer,
   DragSelectStyleSwitcher,
-  DRAG_MODE_ADD,
   DRAG_MODE_REMOVE,
   useDragSelector
 } from './DragSelector/DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
-import keyStyles from './key.module.css'
 import styles from './reorder.module.css'
+import SelectableKey from './SelectableKey.jsx'
 
 const scale = 0.6
 
@@ -53,12 +51,6 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     }))
   ), [keyPolygons])
 
-  const handleDragSelect = useCallback(({ mode, intersections }) => {
-    mode === DRAG_MODE_REMOVE
-      ? actions.removeFromSelected(intersections)
-      : actions.addToSelected(intersections)
-  }, [actions])
-
   useEffect(() => {
     function handleKey (event) {
       (event.key === 'f' || event.key === 'j') && actions.nextGroup();
@@ -70,64 +62,18 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     return () => document.body.removeEventListener('keydown', handleKey)
   }, [actions])
 
+  const handleDragSelect = useCallback(({ mode, intersections }) => {
+    mode === DRAG_MODE_REMOVE
+      ? actions.removeFromSelected(intersections)
+      : actions.addToSelected(intersections)
+  }, [actions])
+
   const dragProps = useDragSelector(keyPolygons, handleDragSelect)
-  const { intersections, mode: dragMode } = dragProps
 
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
   const colMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.columns, 'x'), [keyCenters, state.columns])
   const keyAssignments = useMemo(() => getKeyAssignments(layout, { rows: state.rows, columns: state.columns }), [layout, state.rows, state.columns])
   const isComplete = useMemo(() => keyAssignments.every(([row, col]) => row !== null && col !== null), [keyAssignments])
-
-  const renderKey = useCallback(props => {
-    const { index } = props
-    const group = state[state.selectionMode][state.selection]
-    const selected = group.includes(index)
-    const previewMarkerHover = previewSelection !== null && (
-      state[previewSelection[0]][
-        previewSelection[1]
-      ].includes(index)
-    )
-
-    const previewDragSelect = dragMode === DRAG_MODE_REMOVE
-      ? intersections.filter(index => group.includes(index))
-      : intersections.filter(index => !group.includes(index))
-
-    const preview = (
-      (dragMode === DRAG_MODE_ADD && previewDragSelect.includes(index)) ||
-      (previewMarkerHover)
-    )
-
-    const previewDeselect = dragMode === DRAG_MODE_REMOVE && previewDragSelect.includes(index)
-    const [assignedRow, assignedCol] = keyAssignments[index] || [null, null]
-    const label = `(${assignedRow ?? '_'},${assignedCol ?? '_'})`
-
-    return (
-      <Key
-        {...props}
-        index={label}
-        onClick={event => {
-          event.stopPropagation()
-          if (selected) {
-            actions.removeFromSelected(index)
-          } else {
-            actions.addToSelected(index)
-          }
-        }}
-        className={classNames(keyStyles.selectable, {
-          [keyStyles.selected]: selected,
-          [keyStyles.preview]: preview,
-          [keyStyles.previewDeselect]: previewDeselect
-        })}
-      />
-    )
-  }, [
-    state,
-    actions,
-    keyAssignments,
-    previewSelection,
-    intersections,
-    dragMode
-  ])
 
   const handleConfirm = useCallback(() => {
     const updatedLayout = applyToLayout(originalLayout, keyAssignments)
@@ -142,9 +88,8 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
         </DialogHeading>
 
         <DialogNote>
-          If your layout looks correct visually but the textual layout doesn't,
-          you can use this to re-assign keys to the appropriate row and column
-          values.
+          If your layout looks correct but the textual layout doesn't, you can
+          use this to re-assign keys to the appropriate row and column values.
         </DialogNote>
 
         <div className={styles.gridControllerWrapper}>
@@ -172,13 +117,17 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
               />
             ))}
 
-            <DragSelectContainer {...dragProps}>
-              <Layout
-                layout={layout}
-                scale={scale}
-                renderKey={renderKey}
-              />
-            </DragSelectContainer>
+            <ReorderContext.Provider value={{ state, actions, previewSelection, keyAssignments }}>
+              <DragSelectContainer {...dragProps}>
+                <Layout
+                  layout={layout}
+                  scale={scale}
+                  renderKey={props => (
+                    <SelectableKey {...props} />
+                  )}
+                />
+              </DragSelectContainer>
+            </ReorderContext.Provider>
           </div>
 
           <DragSelectStyleSwitcher {...dragProps} />
