@@ -2,9 +2,9 @@ import classNames from 'classnames'
 
 import styles from './dialog.module.css'
 
-export function Dialog ({ children }) {
+export function Dialog ({ children, ...props }) {
   return (
-    <div className={styles.dialog}>
+    <div className={styles.dialog} {...props}>
       {children}
     </div>
   )

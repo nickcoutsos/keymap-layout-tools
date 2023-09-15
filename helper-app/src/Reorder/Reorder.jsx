@@ -82,7 +82,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
 
   return (
     <Modal>
-      <Dialog>
+      <Dialog style={{ maxWidth: '800px' }}>
         <DialogHeading>
           <h2>Re-map layout grid</h2>
         </DialogHeading>

@@ -1,8 +1,10 @@
 import difference from 'lodash/difference.js'
+import isNil from 'lodash/isNil.js'
 import map from 'lodash/map.js'
 import meanBy from 'lodash/meanBy.js'
 import times from 'lodash/times.js'
 import uniq from 'lodash/uniq.js'
+import without from 'lodash/without.js'
 
 import { useCallback, useMemo, useReducer } from 'react'
 
@@ -115,13 +117,18 @@ function reducer (state, action) {
 }
 
 function createInitialState (layout) {
-  const rows = times(Math.max(...map(layout, 'row')) + 1, () => [])
-  const columns = times(Math.max(...map(layout, 'col')) + 1, () => [])
+  const rowValues = without(map(layout, 'row'), isNil)
+  const colValues = without(map(layout, 'col'), isNil)
+  const rows = times(Math.max(...rowValues) + 1, () => [])
+  const columns = times(Math.max(...colValues) + 1, () => [])
 
   layout.forEach(({ row, col }, i) => {
-    rows[row].push(i)
-    columns[col].push(i)
+    if (!isNil(row)) rows[row].push(i)
+    if (!isNil(col)) columns[col].push(i)
   })
+
+  if (rows.length === 0) rows.push([])
+  if (columns.length === 0) columns.push([])
 
   return {
     rows,

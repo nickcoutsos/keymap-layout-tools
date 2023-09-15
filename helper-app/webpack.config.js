@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { SourceMapDevToolPlugin } = require('webpack')
 
 module.exports = {
   entry: './src/index.jsx',
@@ -76,6 +77,9 @@ module.exports = {
     port: 3000
   },
   plugins: [
+    new SourceMapDevToolPlugin({
+      filename: '[file].map[query]'
+    }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: 'index.html'

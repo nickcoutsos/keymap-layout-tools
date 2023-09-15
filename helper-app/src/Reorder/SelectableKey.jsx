@@ -13,7 +13,7 @@ export default function SelectableKey (props) {
   const { index } = props
   const { dragMode, intersections } = useDragContext()
   const { state, actions, previewSelection, keyAssignments } = useReorderContext()
-  const group = state[state.selectionMode][state.selection]
+  const group = state[state.selectionMode][state.selection] || []
   const selected = group.includes(index)
   const previewMarkerHover = previewSelection !== null && (
     state[previewSelection[0]][
