@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 
 import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry'
 
@@ -7,13 +8,9 @@ import Code from './Code/Code.jsx'
 import KeyboardLayout from './KeyboardLayout.jsx'
 import TextualLayout from './TextualLayout.jsx'
 import Key from './Key.jsx'
-import corneLayout from './corne-layout.json'
-import styles from './styles.module.css'
 
-function serialize (layout) {
-  const lines = layout.map(line => '  ' + JSON.stringify(line))
-  return `[\n${lines.join(',\n')}\n]`
-}
+import styles from './styles.module.css'
+import { selectLayout } from './metadataSlice'
 
 function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
   const bbox = getLayoutBoundingRect(layout)
@@ -29,7 +26,7 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
 }
 
 export default function App () {
-  const [layout, setLayout] = useState(corneLayout)
+  const layout = useSelector(selectLayout)
   const [scale, setScale] = useState(0.7)
   const wrapperStyle = useMemo(
     () => getWrapperStyle(layout, { scale }),
@@ -51,10 +48,7 @@ export default function App () {
     <div className={styles.container}>
       <div className={styles.code}>
         <h2>Layout</h2>
-        <Code
-          value={serialize(layout)}
-          onChange={setLayout}
-        />
+        <Code />
       </div>
 
       <div className={styles.previews}>

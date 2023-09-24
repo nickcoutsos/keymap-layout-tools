@@ -1,84 +1,49 @@
-import { useCallback, useEffect, useMemo } from 'react'
-import { validateInfoJson } from 'keymap-layout-tools/lib/validate'
+import { useCallback, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
 import Importer from '../Importers/Importer.jsx'
 import Reorder from '../Reorder/Reorder.jsx'
 import useDarkModePreference from '../hooks/use-dark-mode-preference.js'
-import { normalize, isRawLayout } from './util'
-import useCodeReducer from './reducer.js'
+import { isRawLayout } from './util'
 import styles from './styles.module.css'
+import {
+  updateFromText,
+  updateFromParsed,
+  formatText,
+  generateMetadata,
+  selectMetadata,
+  changeSelectedLayout,
+  selectLayout
+} from '../metadataSlice.js'
 
 const jsonExtension = json()
 
-export default function Code ({ value, onChange }) {
-  const [{ modal, text, errors, parsed, selectedLayout }, dispatch] = useCodeReducer(value)
+export default function Code () {
+  const [modal, setModal] = useState(null)
+  const { text, errors, parsed, selectedLayout } = useSelector(selectMetadata)
+  const dispatch = useDispatch()
   const isDarkMode = useDarkModePreference()
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
-  const layout = useMemo(() => {
-    if (!parsed) {
-      return null
-    }
-
-    if (isRawLayout(parsed)) {
-      return parsed
-    }
-
-    const defaultLayout = Object.keys(parsed.layouts || {})[0]
-    return parsed.layouts[selectedLayout]?.layout || parsed.layouts[defaultLayout]?.layout
-  }, [parsed, selectedLayout])
+  const layout = useSelector(selectLayout)
 
   const handleEdit = useCallback(text => {
-    try {
-      const parsed = JSON.parse(text)
-      const metadata = normalize(parsed)
-
-      validateInfoJson(metadata)
-
-      dispatch({
-        type: 'updated',
-        payload: { parsed, text }
-      })
-    } catch (err) {
-      dispatch({
-        type: 'errored',
-        payload: { text, err }
-      })
-    }
+    dispatch(updateFromText({ text }))
   }, [dispatch])
 
-  useEffect(() => {
-    const metadata = normalize(parsed)
-
-    onChange(
-      metadata.layouts[selectedLayout]?.layout ||
-      Object.values(metadata.layouts)[0].layout
-    )
-  }, [parsed, selectedLayout, onChange])
-
   const handleFormat = useCallback(() => {
-    dispatch({ type: 'reFormatted' })
+    dispatch(formatText())
   }, [dispatch])
 
   const handleGenerateMetadata = useCallback(() => {
-    dispatch({ type: 'toMetadata' })
-  }, [dispatch])
-
-  const handleReorderedLayout = useCallback(layout => {
-    dispatch({
-      type: 'reOrdered',
-      payload: { layout }
-    })
+    dispatch(generateMetadata())
   }, [dispatch])
 
   const handleSelectLayout = useCallback(event => {
     const selectedLayout = event.target.value
-    dispatch({
-      type: 'selectedLayout',
-      payload: { selectedLayout }
-    })
+    dispatch(changeSelectedLayout({ selectedLayout }))
   }, [dispatch])
 
   return (
@@ -86,19 +51,20 @@ export default function Code ({ value, onChange }) {
       {layout && modal === 'reorder' && (
         <Reorder
           layout={layout}
-          onUpdate={handleReorderedLayout}
-          onCancel={() => dispatch({ type: 'closedModal' })}
+          onUpdate={layout => {
+            dispatch(updateFromParsed({ layout }))
+            setModal(null)
+          }}
+          onCancel={() => setModal(null)}
         />
       )}
       {modal === 'importer' && (
         <Importer
-          onSubmit={layout => {
-            dispatch({
-              type: 'imported',
-              payload: { layout }
-            })
+          onSubmit={metadata => {
+            dispatch(updateFromParsed({ metadata }))
+            setModal(null)
           }}
-          onCancel={() => dispatch({ type: 'closedModal' })}
+          onCancel={() => setModal(null)}
         />
       )}
       <div className={styles.actions}>
@@ -115,8 +81,8 @@ export default function Code ({ value, onChange }) {
             Generate metadata
           </button>
         )}
-        <button onClick={() => dispatch({ type: 'openedModal', payload: { modal: 'reorder' } })}>Re-order</button>
-        <button onClick={() => dispatch({ type: 'openedModal', payload: { modal: 'importer' } })}>
+        <button onClick={() => setModal('reorder')}>Re-order</button>
+        <button onClick={() => setModal('importer')}>
           Import...
         </button>
       </div>
