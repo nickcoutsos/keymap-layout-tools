@@ -1,33 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { validateInfoJson, InfoValidationError } from 'keymap-layout-tools/lib/validate'
+import { validateInfoJson } from 'keymap-layout-tools/lib/validate'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
 import Importer from '../Importers/Importer.jsx'
 import Reorder from '../Reorder/Reorder.jsx'
-import { formatMetadata, isRawLayout } from './util'
+import { normalize, isRawLayout } from './util'
+import useCodeReducer from './reducer.js'
 import styles from './styles.module.css'
 
 const jsonExtension = json()
 const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
 
-function normalize (layoutOrMetadata) {
-  return isRawLayout(layoutOrMetadata)
-    ? { layouts: { default: { layout: layoutOrMetadata } } }
-    : layoutOrMetadata
-}
-
 export default function Code ({ value, onChange }) {
-  const [showImporterDialog, setShowImporterDialog] = useState(false)
-  const [showReorderDialog, setShowReorderDialog] = useState(false)
+  const [{ modal, text, errors, parsed, selectedLayout }, dispatch] = useCodeReducer(value)
   const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
-  const initialParse = useMemo(() => normalize(JSON.parse(value)), [value])
-  const [{ text, errors, parsed, selectedLayout }, setState] = useState({
-    text: value,
-    errors: [],
-    parsed: initialParse,
-    selectedLayout: Object.keys(initialParse.layouts)[0]
-  })
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
   const layout = useMemo(() => {
@@ -56,25 +43,20 @@ export default function Code ({ value, onChange }) {
     try {
       const parsed = JSON.parse(text)
       const metadata = normalize(parsed)
-      const defaultLayout = Object.keys(metadata.layouts)[0]
 
       validateInfoJson(metadata)
 
-      setState(state => ({
-        ...state,
-        text,
-        errors: [],
-        parsed,
-        selectedLayout: state.selectedLayout in metadata.layouts ? state.selectedLayout : defaultLayout
-      }))
+      dispatch({
+        type: 'updated',
+        payload: { parsed, text }
+      })
     } catch (err) {
-      const errors = err instanceof InfoValidationError
-        ? err.errors
-        : [err.toString()]
-
-      setState(state => ({ ...state, text, errors }))
+      dispatch({
+        type: 'errored',
+        payload: { text, err }
+      })
     }
-  }, [setState])
+  }, [dispatch])
 
   useEffect(() => {
     const metadata = normalize(parsed)
@@ -86,84 +68,46 @@ export default function Code ({ value, onChange }) {
   }, [parsed, selectedLayout, onChange])
 
   const handleFormat = useCallback(() => {
-    setState(state => ({ ...state, text: formatMetadata(state.parsed) }))
-  }, [setState])
+    dispatch({ type: 'reFormatted' })
+  }, [dispatch])
 
   const handleGenerateMetadata = useCallback(() => {
-    setState(state => {
-      if (!isRawLayout(state.parsed)) {
-        return state
-      }
-
-      const parsed = {
-        layouts: {
-          default: {
-            layout: state.parsed
-          }
-        }
-      }
-
-      return { ...state, parsed, text: formatMetadata(parsed) }
-    })
-  }, [setState])
+    dispatch({ type: 'toMetadata' })
+  }, [dispatch])
 
   const handleReorderedLayout = useCallback(layout => {
-    setState(state => {
-      const original = state.parsed
-      let updated = layout
-
-      if (!isRawLayout(original)) {
-        const defaultLayout = Object.keys(original.layouts)[0]
-        const selectedLayout = state.selectedLayout in original.layouts
-          ? state.selectedLayout
-          : defaultLayout
-
-        updated = {
-          ...original,
-          layouts: {
-            ...original.layouts,
-            [selectedLayout]: {
-              ...original.layouts[selectedLayout],
-              layout
-            }
-          }
-        }
-      }
-
-      return {
-        ...state,
-        parsed: updated,
-        text: formatMetadata(updated)
-      }
+    dispatch({
+      type: 'reOrdered',
+      payload: { layout }
     })
-    setShowReorderDialog(false)
-  }, [setState, setShowReorderDialog])
+  }, [dispatch])
 
   const handleSelectLayout = useCallback(event => {
-    setState(state => ({ ...state, selectedLayout: event.target.value }))
-  }, [setState])
+    const selectedLayout = event.target.value
+    dispatch({
+      type: 'selectedLayout',
+      payload: { selectedLayout }
+    })
+  }, [dispatch])
 
   return (
     <>
-      {layout && showReorderDialog && (
+      {layout && modal === 'reorder' && (
         <Reorder
           layout={layout}
           onUpdate={handleReorderedLayout}
-          onCancel={() => setShowReorderDialog(false)}
+          onCancel={() => dispatch({ type: 'closedModal' })}
         />
       )}
-      {showImporterDialog && (
+      {modal === 'importer' && (
         <Importer
           onSubmit={layout => {
-            setState(state => ({
-              ...state,
-              parsed: layout,
-              selectedLayout: null,
-              text: formatMetadata(layout)
-            }))
-            setShowImporterDialog(false)
+            dispatch({
+              type: 'imported',
+              payload: { layout }
+            })
           }}
-          onCancel={() => setShowImporterDialog(false)}
+          onCancel={() => dispatch({ type: 'closedModal' })}
         />
       )}
       <div className={styles.actions}>
@@ -180,8 +124,8 @@ export default function Code ({ value, onChange }) {
             Generate metadata
           </button>
         )}
-        <button onClick={() => setShowReorderDialog(true)}>Re-order</button>
-        <button onClick={() => setShowImporterDialog(true)}>
+        <button onClick={() => dispatch({ type: 'openedModal', payload: { modal: 'reorder' } })}>Re-order</button>
+        <button onClick={() => dispatch({ type: 'openedModal', payload: { modal: 'importer' } })}>
           Import...
         </button>
       </div>

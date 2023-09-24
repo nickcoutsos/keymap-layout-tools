@@ -1,6 +1,12 @@
 import { formatJson, jsonTable } from './formatter'
 export { parseKleLayout } from '../Importers/KeyboardLayoutEditor/parser.js'
 
+export function normalize (layoutOrMetadata) {
+  return isRawLayout(layoutOrMetadata)
+    ? { layouts: { default: { layout: layoutOrMetadata } } }
+    : layoutOrMetadata
+}
+
 export function formatMetadata (metadata) {
   return formatJson(metadata, [{
     match: (key, value) => Array.isArray(value),
