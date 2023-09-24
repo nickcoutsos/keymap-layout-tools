@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 
-import { getKeyBoundingBox } from 'keymap-layout-tools/lib/geometry'
-import renderLayout from 'keymap-layout-tools/lib/render'
+import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry'
 
 import './App.css'
 import Code from './Code/Code.jsx'
 import KeyboardLayout from './KeyboardLayout.jsx'
+import TextualLayout from './TextualLayout.jsx'
 import Key from './Key.jsx'
 import corneLayout from './corne-layout.json'
 import styles from './styles.module.css'
@@ -16,18 +16,13 @@ function serialize (layout) {
 }
 
 function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
-  const bbox = layout.map(key => getKeyBoundingBox(
-    { x: key.x, y: key.y },
-    { u: key.u || key.w || 1, h: key.h || 1 },
-    { x: key.rx, y: key.ry, a: key.r }
-  )).reduce(({ x, y }, { max }) => ({
-    x: Math.max(x, max.x),
-    y: Math.max(y, max.y)
-  }), { x: 0, y: 0 })
+  const bbox = getLayoutBoundingRect(layout)
+  const width = bbox.max.x - bbox.min.x
+  const height = bbox.max.y - bbox.min.y
 
   return {
-    width: `${bbox.x * scale}px`,
-    height: `${bbox.y * scale}px`,
+    width: `${width * scale}px`,
+    height: `${height * scale}px`,
     margin: '0 auto',
     ...overrides
   }
@@ -36,7 +31,6 @@ function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
 export default function App () {
   const [layout, setLayout] = useState(corneLayout)
   const [scale, setScale] = useState(0.7)
-  const labels = useMemo(() => layout.map((_, i) => i.toString()), [layout])
   const wrapperStyle = useMemo(
     () => getWrapperStyle(layout, { scale }),
     [layout, scale]
@@ -72,13 +66,7 @@ export default function App () {
             and the key ordering of your layout.
           </em>
         </p>
-        <pre style={{ maxHeight: '15em', overflow: 'auto' }}>
-          {(
-            layout.every(key => 'row' in key && 'col' in key)
-              ? renderLayout(layout, labels)
-              : ' -- Missing `row`/`col` attributes from layout --'
-          )}
-        </pre>
+        <TextualLayout layout={layout} />
 
         <h2>
           Graphical Rendering <span className={styles.zoom}>(Zoom: {scale.toFixed(1)}x {zoom})</span>

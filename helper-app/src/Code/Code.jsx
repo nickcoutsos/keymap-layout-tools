@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { validateInfoJson } from 'keymap-layout-tools/lib/validate'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
 import Importer from '../Importers/Importer.jsx'
 import Reorder from '../Reorder/Reorder.jsx'
+import useDarkModePreference from '../hooks/use-dark-mode-preference.js'
 import { normalize, isRawLayout } from './util'
 import useCodeReducer from './reducer.js'
 import styles from './styles.module.css'
 
 const jsonExtension = json()
-const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
 
 export default function Code ({ value, onChange }) {
   const [{ modal, text, errors, parsed, selectedLayout }, dispatch] = useCodeReducer(value)
-  const [theme, setTheme] = useState(darkModePreference.matches ? 'dark' : 'light')
+  const isDarkMode = useDarkModePreference()
 
   const layouts = isRawLayout(parsed) ? [] : Object.keys(parsed.layouts || {})
   const layout = useMemo(() => {
@@ -29,15 +29,6 @@ export default function Code ({ value, onChange }) {
     const defaultLayout = Object.keys(parsed.layouts || {})[0]
     return parsed.layouts[selectedLayout]?.layout || parsed.layouts[defaultLayout]?.layout
   }, [parsed, selectedLayout])
-
-  useEffect(() => {
-    const handleChange = e => {
-      setTheme(e.matches ? 'dark' : 'light')
-    }
-
-    darkModePreference.addEventListener('change', handleChange)
-    return () => darkModePreference.removeEventListener('change', handleChange)
-  })
 
   const handleEdit = useCallback(text => {
     try {
@@ -132,7 +123,7 @@ export default function Code ({ value, onChange }) {
       <CodeMirror
         value={text}
         style={{ overflow: 'auto' }}
-        theme={theme}
+        theme={isDarkMode ? 'dark' : 'light'}
         width="460px"
         onChange={handleEdit}
         extensions={[jsonExtension]}
