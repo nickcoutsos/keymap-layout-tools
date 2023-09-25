@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry'
 
 import './App.css'
+import Actions from './Actions.jsx'
 import Code from './Code/Code.jsx'
 import KeyboardLayout from './KeyboardLayout.jsx'
 import TextualLayout from './TextualLayout.jsx'
@@ -47,11 +48,12 @@ export default function App () {
   return (
     <div className={styles.container}>
       <div className={styles.code}>
-        <h2>Layout</h2>
+        <Actions />
         <Code />
       </div>
 
       <div className={styles.previews}>
+
         <h2>Text Rendering</h2>
         <p>
           <em>

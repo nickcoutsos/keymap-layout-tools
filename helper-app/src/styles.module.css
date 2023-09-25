@@ -1,3 +1,9 @@
+.actions {
+  display: flex;
+  gap: 4px;
+  margin: 5px 0;
+}
+
 .container {
   display: flex;
   flex-direction: row;
@@ -7,7 +13,7 @@
 
 .code {
   display: flex;
-  padding: 0 15px 15px;
+  padding: 0 15px 15px 15px;
   flex-direction: column;
 }
 
@@ -44,5 +50,6 @@
   box-sizing: border-box;
   color: var(--key-color-base);
   background-color: var(--key-bg-base);
+  box-sizing: border-box;
   cursor: default;
 }

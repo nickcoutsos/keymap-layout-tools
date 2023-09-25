@@ -1,9 +1,3 @@
-.actions {
-  display: flex;
-  gap: 4px;
-  margin: 5px 0;
-}
-
 .error {
   color: tomato;
   font-size: 80%;
