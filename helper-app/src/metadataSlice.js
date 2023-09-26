@@ -3,19 +3,16 @@ import { InfoValidationError, validateInfoJson } from 'keymap-layout-tools/lib/v
 import { formatMetadata, isRawLayout, normalize } from './Code/util'
 import corneLayout from './corne-layout.json'
 
-function serialize (layout) {
-  const lines = layout.map(line => '  ' + JSON.stringify(line))
-  return `[\n${lines.join(',\n')}\n]`
+const initialState = {
+  text: formatMetadata(corneLayout),
+  errors: [],
+  parsed: corneLayout,
+  selectedLayout: null
 }
 
 const metadataSlice = createSlice({
   name: 'metadata',
-  initialState: {
-    text: serialize(corneLayout),
-    errors: [],
-    parsed: corneLayout,
-    selectedLayout: null
-  },
+  initialState,
   reducers: {
     changeSelectedLayout (state, action) {
       state.selectedLayout = action.payload.selectedLayout

@@ -65,7 +65,7 @@ function LayoutSwitcher () {
   }, [dispatch])
 
   return layouts.length > 1 && (
-    <select value={selectedLayout} onChange={switchLayout}>
+    <select value={selectedLayout || ''} onChange={switchLayout}>
       {layouts.map((name, i) => (
         <option key={i} value={name}>
           {name}
