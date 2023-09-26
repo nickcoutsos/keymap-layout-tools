@@ -3,10 +3,9 @@ import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 
-import KeyPlacer from './KeyPlacer.jsx'
+import Layout from './Common/Layout.jsx'
 import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
-import styles from './styles.module.css'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -29,26 +28,29 @@ function KeyboardLayout (props) {
   )
 
   return (
-    <div className={styles.layout} style={{ transform: `scale(${scale})` }}>
-      {layout.map((keyLayout, index) => (
-        <KeyPlacer
-          key={index}
-          keyLayout={keyLayout}
-          // this will probably break if keys overlap
-          onMouseEnter={() => setHovering(index)}
-          onMouseLeave={() => setHovering(null)}
-        >
-          {renderKey({ index, keyLayout })}
-        </KeyPlacer>
-      ))}
-      {rotating && rotating.map(({ index, keyLayout }) => (
-        <RotationOriginHelper
-          key={index}
-          showArc={index === hovering}
-          keyLayout={keyLayout}
-        />
-      ))}
-    </div>
+    <>
+      <Layout
+        layout={layout}
+        scale={scale}
+        renderKey={({ keyLayout, index }) => (
+          renderKey({
+            index,
+            keyLayout,
+            onMouseEnter: () => setHovering(index),
+            onMouseLeave: () => setHovering(null)
+          })
+        )}
+        renderOverlay={(layout) => (
+          rotating && rotating.map(({ index }) => (
+            <RotationOriginHelper
+              key={index}
+              showArc={index === hovering}
+              keyLayout={layout[index]}
+            />
+          ))
+        )}
+      />
+    </>
   )
 }
 

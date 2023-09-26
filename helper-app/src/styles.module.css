@@ -25,11 +25,6 @@
   vertical-align: middle;
 }
 
-.layout {
-  position: relative;
-  transform-origin: 0;
-}
-
 .placer {
   position: absolute;
 }
