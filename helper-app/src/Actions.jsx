@@ -14,6 +14,7 @@ import {
 import { isRawLayout } from './Code/util'
 import Reorder from './Reorder/Reorder.jsx'
 import Importer from './Importers/Importer.jsx'
+import MirrorDialog from './MirrorDialog/MirrorDialog.jsx'
 
 export default function Actions () {
   const dispatch = useDispatch()
@@ -29,6 +30,9 @@ export default function Actions () {
       <button onClick={() => setModal('reorder')}>Re-order</button>
       <button onClick={() => setModal('importer')}>
         Import...
+      </button>
+      <button onClick={() => setModal('mirror')}>
+        Mirror
       </button>
 
       {modal === 'reorder' && (
@@ -48,6 +52,15 @@ export default function Actions () {
             setModal(null)
           }}
           onCancel={close}
+        />
+      )}
+      {modal === 'mirror' && (
+        <MirrorDialog
+          onCancel={close}
+          onSubmit={layout => {
+            dispatch(updateFromParsed({ layout }))
+            close()
+          }}
         />
       )}
     </div>

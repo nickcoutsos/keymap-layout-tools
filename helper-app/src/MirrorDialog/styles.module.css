@@ -1,0 +1,7 @@
+.mirrorDialog fieldset {
+  border: none;
+}
+
+.mirrorDialog input[type="range"] {
+  vertical-align: middle;
+}
