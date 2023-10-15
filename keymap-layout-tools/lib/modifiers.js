@@ -100,7 +100,8 @@ function groupByRow (layout) {
  * @returns {Array<LayoutKey>}
  */
 export function mirror (layout, { gap = 0, referenceOriginal = false } = {}) {
-  const maxX = Math.max(...layout.map(k => k.x))
+  const bbox = getLayoutBoundingRect(layout, { keySize: 1, padding: 0 })
+  const maxX = Math.ceil(bbox.max.x)
   const maxCol = Math.max(...layout.map(k => k.col))
 
   if (referenceOriginal) {
