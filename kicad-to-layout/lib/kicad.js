@@ -62,21 +62,6 @@ export function parseKicadLayout (pcbFileContents, options) {
     layout = modifiers.mirror(layout, { gap: 2 })
   }
 
-  // Rotation origins are generally weird. KLE's rotations always default to the
-  // canvas origin, QMK's rotations default to the key's top-left corner. Kicad
-  // rotations are around the component's center point so we need to make that
-  // explicit here.
-  // This was originally happening earlier in the `generateLayout` function but
-  // that impacts the flip/mirror logic because the key's origin is the top-left
-  // corner, which means the center is define relative to that point. When the
-  // layout gets flipped it would put the "center" outside the key.
-  for (const key of layout) {
-    if (key.r) {
-      key.rx = key.x + .5
-      key.ry = key.y + .5
-    }
-  }
-
   const bbox = getLayoutBoundingRect(layout, { keySize: 1, padding: 0 })
   for (const key of layout) {
     key.x -= bbox.min.x
@@ -182,6 +167,15 @@ export function generateLayout (switches, options) {
       if (Math.abs(sw.angle) > 150 && Math.abs(sw.angle) < 210) {
         key.r += Math.sign(sw.angle) * 180
       }
+    }
+
+    // Rotation origins are generally weird. KLE's rotations always default to
+    // the canvas origin, QMK's rotations default to the key's top-left corner.
+    // Kicad rotations are around the component's center point so we need to
+    // make that explicit here.
+    if (key.r) {
+      key.rx = key.x + .5
+      key.ry = key.y + .5
     }
 
     return [...keys, key]

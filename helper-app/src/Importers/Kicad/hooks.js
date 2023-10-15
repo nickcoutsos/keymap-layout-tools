@@ -50,13 +50,6 @@ export function useKicadImporter (contents, options) {
       layout = mirror(layout, { referenceOriginal: true, gap: 2 })
     }
 
-    for (const key of layout) {
-      if (key.r) {
-        key.rx = key.x + 0.5
-        key.ry = key.y + 0.5
-      }
-    }
-
     return setFixedPrecision(toOrigin(layout))
   }, [rawLayout, options.invert, options.mirror])
 

@@ -56,6 +56,9 @@ export function flip (layout, { referenceOriginal = false } = {}) {
       if ('r' in key) {
         newKey.r = -key.r
       }
+      if ('rx' in key) {
+        newKey.rx = newKey.x + (key.x - key.rx) * -1
+      }
 
       if (referenceOriginal) {
         newKey._original = layout.length + i
@@ -116,6 +119,10 @@ export function mirror (layout, { gap = 0, referenceOriginal = false } = {}) {
       const mirroredKey = { ...key }
       mirroredKey.x = key.x + maxX + gap
       mirroredKey.col = key.col + maxCol + Math.ceil(gap)
+
+      if ('rx' in mirroredKey) {
+        mirroredKey.rx = mirroredKey.rx + maxX + gap
+      }
 
       if (referenceOriginal) {
         mirroredKey._original = key._original
