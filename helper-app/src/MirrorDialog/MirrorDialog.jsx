@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -14,7 +15,7 @@ import styles from './styles.module.css'
 export default function MirrorDialog ({ onSubmit, onCancel }) {
   const initialLayout = useSelector(selectLayout)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
-  const { mirrored } = useMirrorTransform(initialLayout, options)
+  const { mirrored, mirroredWithMetadata } = useMirrorTransform(initialLayout, options)
 
   return (
     <Modal onDismiss={onCancel}>
@@ -30,9 +31,9 @@ export default function MirrorDialog ({ onSubmit, onCancel }) {
           </fieldset>
 
           <h3>Preview</h3>
-          {mirrored && (
+          {mirroredWithMetadata && (
             <Layout
-              layout={mirrored}
+              layout={mirroredWithMetadata}
               scale={0.5}
               overrides={{ margin: '0 auto' }}
               renderKey={renderSwitch}
@@ -49,15 +50,14 @@ export default function MirrorDialog ({ onSubmit, onCancel }) {
   )
 }
 
-function renderSwitch ({ keyLayout }) {
+function renderSwitch ({ keyLayout, index }) {
   return (
     <Key
-      index={keyLayout._switch?.name}
+      index={index}
       keyLayout={keyLayout}
-      title={[
-        `Module/footprint label: "${keyLayout._switch?.mod}"`,
-        `Switch label: "${keyLayout._switch?.name}"`
-      ].join('\n')}
+      className={classNames({
+        [styles.mirroredKey]: keyLayout._duplicate
+      })}
     />
   )
 }

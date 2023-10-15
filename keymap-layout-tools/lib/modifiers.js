@@ -126,6 +126,7 @@ export function mirror (layout, { gap = 0, referenceOriginal = false } = {}) {
 
       if (referenceOriginal) {
         mirroredKey._original = key._original
+        mirroredKey._duplicate = true
       }
 
       return mirroredKey
