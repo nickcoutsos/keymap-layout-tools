@@ -11,9 +11,10 @@ This repository includes a helper application to:
   PCBs, and Keyboard Layout Editor JSON)
 - tooling to help generate textual layouts for readable keymap code
 
-The code is based on the layout rendering implemented in [Keymap Editor] which
-is known to have some issues with rotation. Part of the reason for this project
-is to make these issues and inconsistencies more apparent and make fixes easier.
+The code is based on the layout rendering implemented in [Keymap Editor] ~which
+is known to have some issues with rotation.~ (👍) Part of the reason for this
+project is to make these issues and inconsistencies more apparent and make fixes
+easier.
 
 ## What this isn't
 
