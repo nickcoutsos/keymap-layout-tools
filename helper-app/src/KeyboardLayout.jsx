@@ -1,11 +1,19 @@
+import classNames from 'classnames'
 import isEqual from 'lodash/isEqual'
 import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Layout from './Common/Layout.jsx'
 import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
+import Key from './Key.jsx'
+import styles from './styles.module.css'
+import {
+  updateKeySelection,
+  selectKeySelection
+} from './metadataSlice.js'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -15,8 +23,11 @@ function matchRotations (keyA, keyB) {
 }
 
 function KeyboardLayout (props) {
-  const { layout, renderKey, scale } = props
+  const { layout, scale } = props
   const [hovering, setHovering] = useState(null)
+  const dispatch = useDispatch()
+  const selectedKeys = useSelector(selectKeySelection)
+
   const rotating = hovering !== null && !!layout[hovering].r && (
     layout.reduce((acc, keyLayout, index) => {
       if (matchRotations(keyLayout, layout[hovering])) {
@@ -27,18 +38,31 @@ function KeyboardLayout (props) {
     }, [])
   )
 
+  const toggleSelection = useCallback((event, index) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dispatch(updateKeySelection({
+      keys: selectedKeys.includes(index) ? [] : [index],
+      append: event.shiftKey
+    }))
+  }, [selectedKeys, dispatch])
+
   return (
     <>
       <Layout
         layout={layout}
         scale={scale}
         renderKey={({ keyLayout, index }) => (
-          renderKey({
-            index,
-            keyLayout,
-            onMouseEnter: () => setHovering(index),
-            onMouseLeave: () => setHovering(null)
-          })
+          <Key
+            index={index}
+            keyLayout={keyLayout}
+            className={classNames({
+              [styles.selected]: selectedKeys.includes(index)
+            })}
+            onMouseEnter={() => setHovering(index)}
+            onMouseLeave={() => setHovering(null)}
+            onClick={event => toggleSelection(event, index)}
+          />
         )}
         renderOverlay={(layout) => (
           rotating && rotating.map(({ index }) => (

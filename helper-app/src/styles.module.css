@@ -48,3 +48,7 @@
   box-sizing: border-box;
   cursor: default;
 }
+.key.selected {
+  background-color: royalblue;
+  color: white;
+}

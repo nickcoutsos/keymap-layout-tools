@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep.js'
+import uniq from 'lodash/uniq.js'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { InfoValidationError, validateInfoJson } from 'keymap-layout-tools/lib/validate'
@@ -10,6 +11,7 @@ const initialState = {
   parsed: null,
 
   // TODO: Move these into a different state slice
+  keySelection: [],
   selectedLayout: null
 }
 
@@ -19,23 +21,34 @@ const metadataSlice = createSlice({
   reducers: {
     changeSelectedLayout (state, action) {
       state.selectedLayout = action.payload.selectedLayout
+      state.keySelection = []
     },
     metadataUpdated (state, action) {
       const { text, parsed } = action.payload
       const normalized = normalize(parsed)
+      const defaultLayout = Object.keys(normalized.layouts)[0]
 
       state.errors = []
       state.parsed = parsed
       state.text = text
+      state.keySelection = []
       state.selectedLayout = (
         state.selectedLayout in normalized.layouts
           ? state.selectedLayout
-          : Object.keys(normalized.layouts)
+          : defaultLayout
       )
     },
     metadataInvalid (state, action) {
       const { errors } = action.payload
       state.errors = errors
+    },
+    updateKeySelection (state, action) {
+      const { keys, append = false } = action.payload
+      state.keySelection = uniq(
+        append
+          ? [...state.keySelection, ...keys]
+          : [...keys]
+      )
     }
   }
 })
@@ -44,7 +57,7 @@ export const {
   changeSelectedLayout,
   metadataUpdated,
   metadataInvalid,
-  selectKeys
+  updateKeySelection
 } = metadataSlice.actions
 
 export const updateMetadata = createAsyncThunk(
@@ -109,6 +122,8 @@ export const generateMetadata = createAsyncThunk(
 
 export const selectMetadata = state => state.metadata
 
+export const selectActiveLayout = state => state.metadata.selectedLayout
+
 export const selectLayout = state => {
   const { parsed, selectedLayout } = state.metadata
   if (!parsed) {
@@ -130,5 +145,7 @@ export const selectLayoutNames = state => (
     ? []
     : Object.keys(state.metadata.parsed.layouts)
 )
+
+export const selectKeySelection = state => state.metadata.keySelection
 
 export default metadataSlice.reducer
