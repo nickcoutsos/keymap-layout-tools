@@ -4,28 +4,29 @@ const DEFAULT_SIZE = 70
 const DEFAULT_PADDING = 5
 
 export function getComputedParams (position, size, rotation = {}, options = {}) {
-  const { keySize = DEFAULT_SIZE, padding = DEFAULT_PADDING } = options
+  const { keySize = DEFAULT_SIZE } = options
   return {
     x: position.x * keySize,
     y: position.y * keySize,
-    u: size.u * keySize - padding,
-    h: size.h * keySize - padding,
+    u: size.u * keySize,
+    h: size.h * keySize,
     rx: (position.x - (rotation.x ?? position.x)) * -keySize,
     ry: (position.y - (rotation.y ?? position.y)) * -keySize,
     a: rotation.a || 0
   }
 }
 
-export function getKeyStyles (position, size, rotation) {
-  const { x, y, u, h, a, rx, ry } = getComputedParams(position, size, rotation)
+export function getKeyStyles (position, size, rotation, options = {}) {
+  const { x, y, u, h, a, rx, ry } = getComputedParams(position, size, rotation, options)
+  const { padding: p = DEFAULT_PADDING } = options
 
   return {
     top: `${y}px`,
     left: `${x}px`,
-    width: `${u}px`,
-    height: `${h}px`,
+    width: `${u - p}px`,
+    height: `${h - p}px`,
     transformOrigin: `${rx}px ${ry}px`,
-    transform: `rotate(${a || 0}deg)`
+    transform: `rotate(${a || 0}deg) translate(${p / 2}px, ${p / 2}px)`
   }
 }
 
