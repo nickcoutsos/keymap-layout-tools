@@ -1,7 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
-
-import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import './App.css'
 import Actions from './Actions.jsx'
@@ -9,30 +7,14 @@ import Code from './Code/Code.jsx'
 import KeyboardLayout from './KeyboardLayout.jsx'
 import TextualLayout from './TextualLayout.jsx'
 import Key from './Key.jsx'
+import corneLayout from './corne-layout.json'
 
 import styles from './styles.module.css'
-import { selectLayout } from './metadataSlice'
+import { selectLayout, updateMetadata } from './metadataSlice'
 
-function getWrapperStyle (layout, { scale = 1, overrides = {} } = {}) {
-  const bbox = getLayoutBoundingRect(layout)
-  const width = bbox.max.x - bbox.min.x
-  const height = bbox.max.y - bbox.min.y
-
-  return {
-    width: `${width * scale}px`,
-    height: `${height * scale}px`,
-    margin: '0 auto',
-    ...overrides
-  }
-}
-
-export default function App () {
+function App () {
   const layout = useSelector(selectLayout)
   const [scale, setScale] = useState(0.7)
-  const wrapperStyle = useMemo(
-    () => getWrapperStyle(layout, { scale }),
-    [layout, scale]
-  )
 
   const zoom = (
     <input
@@ -73,7 +55,7 @@ export default function App () {
             out using the positon, rotation, and size properties of your layout.
           </em>
         </p>
-        <div style={wrapperStyle}>
+        <div style={{ margin: '0 auto', width: 'fit-content' }}>
           <KeyboardLayout
             layout={layout}
             renderKey={Key}
@@ -84,3 +66,23 @@ export default function App () {
     </div>
   )
 }
+
+function withInitializedState (Component) {
+  return function () {
+    const layout = useSelector(selectLayout)
+    const dispatch = useDispatch()
+    useEffect(() => {
+      dispatch(updateMetadata({
+        metadata: corneLayout
+      }))
+    }, [dispatch])
+
+    if (!layout) {
+      return null
+    }
+
+    return <Component />
+  }
+}
+
+export default withInitializedState(App)

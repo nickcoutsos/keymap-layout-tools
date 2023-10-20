@@ -9,7 +9,7 @@ import {
   selectLayout,
   selectLayoutNames,
   selectMetadata,
-  updateFromParsed
+  updateMetadata
 } from './metadataSlice'
 import { isRawLayout } from './Code/util'
 import Reorder from './Reorder/Reorder.jsx'
@@ -39,7 +39,7 @@ export default function Actions () {
         <Reorder
           layout={layout}
           onUpdate={layout => {
-            dispatch(updateFromParsed({ layout }))
+            dispatch(updateMetadata({ layout }))
             setModal(null)
           }}
           onCancel={close}
@@ -48,7 +48,7 @@ export default function Actions () {
       {modal === 'importer' && (
         <Importer
           onSubmit={metadata => {
-            dispatch(updateFromParsed({ metadata }))
+            dispatch(updateMetadata({ metadata }))
             setModal(null)
           }}
           onCancel={close}
@@ -58,7 +58,7 @@ export default function Actions () {
         <MirrorDialog
           onCancel={close}
           onSubmit={layout => {
-            dispatch(updateFromParsed({ layout }))
+            dispatch(updateMetadata({ layout }))
             close()
           }}
         />

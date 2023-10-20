@@ -1,12 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit'
+import cloneDeep from 'lodash/cloneDeep.js'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+
 import { InfoValidationError, validateInfoJson } from 'keymap-layout-tools/lib/validate'
 import { formatMetadata, isRawLayout, normalize } from './Code/util'
-import corneLayout from './corne-layout.json'
 
 const initialState = {
-  text: formatMetadata(corneLayout),
+  text: '',
   errors: [],
-  parsed: corneLayout,
+  parsed: null,
+
+  // TODO: Move these into a different state slice
   selectedLayout: null
 }
 
@@ -17,79 +20,101 @@ const metadataSlice = createSlice({
     changeSelectedLayout (state, action) {
       state.selectedLayout = action.payload.selectedLayout
     },
-    updateFromText (state, action) {
-      const { text } = action.payload
+    metadataUpdated (state, action) {
+      const { text, parsed } = action.payload
+      const normalized = normalize(parsed)
 
-      try {
-        const parsed = JSON.parse(text)
-        const normalized = normalize(parsed)
-        validateInfoJson(normalized)
-
-        state.errors = []
-        state.text = text
-        state.parsed = parsed
-        state.selectedLayout = (
-          state.selectedLayout in normalized.layouts
-            ? state.selectedLayout
-            : Object.keys(normalized.layouts)
-        )
-      } catch (err) {
-        state.errors = err instanceof InfoValidationError
-          ? err.errors
-          : [err.toString()]
-      }
-    },
-
-    updateFromParsed (state, action) {
-      const { metadata, layout } = action.payload
-
-      if (metadata) {
-        state.parsed = metadata
-      } else if (!isRawLayout(state.parsed)) {
-        const defaultLayout = Object.keys(state.parsed.layouts)[0]
-        const selectedLayout = state.selectedLayout in state.parsed.layouts
-          ? state.selectedLayout
-          : defaultLayout
-
-        state.parsed.layouts[selectedLayout].layout = layout
-      } else {
-        state.parsed = layout
-      }
-
-      const normalized = normalize(state.parsed)
-      state.text = formatMetadata(state.parsed)
+      state.errors = []
+      state.parsed = parsed
+      state.text = text
       state.selectedLayout = (
         state.selectedLayout in normalized.layouts
           ? state.selectedLayout
           : Object.keys(normalized.layouts)
       )
     },
-
-    formatText (state) {
-      state.text = formatMetadata(state.parsed)
-    },
-
-    generateMetadata (state) {
-      if (isRawLayout(state.parsed)) {
-        state.parsed = normalize(state.parsed)
-        state.text = formatMetadata(state.parsed)
-      }
+    metadataInvalid (state, action) {
+      const { errors } = action.payload
+      state.errors = errors
     }
   }
 })
 
 export const {
   changeSelectedLayout,
-  updateFromText,
-  updateFromParsed,
-  formatText,
-  generateMetadata
+  metadataUpdated,
+  metadataInvalid,
+  selectKeys
 } = metadataSlice.actions
+
+export const updateMetadata = createAsyncThunk(
+  'metadata/update',
+  async ({ text, layout, metadata }, { dispatch, getState }) => {
+    let parsed
+    if (text) {
+      try {
+        parsed = JSON.parse(text)
+        const normalized = normalize(parsed)
+        validateInfoJson(normalized)
+      } catch (err) {
+        const errors = err instanceof InfoValidationError
+          ? err.errors
+          : [err.toString()]
+
+        dispatch(metadataInvalid({ errors }))
+        return
+      }
+    } else if (layout) {
+      const state = getState().metadata
+      if (!isRawLayout(state.parsed)) {
+        parsed = cloneDeep(state.parsed)
+        const defaultLayout = Object.keys(parsed.layouts)[0]
+        const selectedLayout = state.selectedLayout in parsed.layouts
+          ? state.selectedLayout
+          : defaultLayout
+        parsed.layouts[selectedLayout].layout = layout
+      } else {
+        parsed = layout
+      }
+      text = formatMetadata(parsed)
+    } else if (metadata) {
+      parsed = metadata
+      text = formatMetadata(parsed)
+    }
+
+    dispatch(metadataUpdated({ parsed, text }))
+  }
+)
+
+export const formatText = createAsyncThunk(
+  'metadata/format',
+  (_, { dispatch, getState }) => {
+    const { parsed } = getState()
+    const formatted = formatMetadata(parsed)
+    dispatch(updateMetadata({ text: formatted }))
+  }
+)
+
+export const generateMetadata = createAsyncThunk(
+  'metadata/wrap',
+  (_, { dispatch, getState }) => {
+    const { parsed } = getState()
+    if (isRawLayout(parsed)) {
+      dispatch(updateMetadata({
+        metadata: normalize(parsed)
+      }))
+    }
+  }
+)
 
 export const selectMetadata = state => state.metadata
 
 export const selectLayout = state => {
   const { parsed, selectedLayout } = state.metadata
+  if (!parsed) {
+    return null
+  }
+
   if (isRawLayout(parsed)) {
     return parsed
   }
