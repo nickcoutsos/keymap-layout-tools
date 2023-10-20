@@ -41,6 +41,10 @@ module.exports = {
         test: /tree-sitter-devicetree\.wasm$/,
         type: 'asset/resource'
       },
+      {
+        test: /tree-sitter-json\.wasm$/,
+        type: 'asset/resource'
+      },
       // Taken from https://github.com/zmkfirmware/zmk/blob/c065d451cb82e2dceda4efdb2991aeeeef1cdbbf/docs/src/docusaurus-tree-sitter-plugin/index.js#L24
       {
         test: /tree-sitter\.js$/,

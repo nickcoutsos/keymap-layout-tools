@@ -4,11 +4,12 @@ import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 
 import useDarkModePreference from '../hooks/use-dark-mode-preference.js'
-import styles from './styles.module.css'
 import {
   updateMetadata,
   selectMetadata
 } from '../metadataSlice.js'
+import { useCodeMarking } from './code-marking.js'
+import styles from './styles.module.css'
 
 const jsonExtension = json()
 
@@ -17,6 +18,7 @@ export default function Code () {
   const { text, errors } = useSelector(selectMetadata)
   const dispatch = useDispatch()
   const isDarkMode = useDarkModePreference()
+  useCodeMarking(doc)
 
   const handleEdit = useCallback(text => {
     dispatch(updateMetadata({ text }))
