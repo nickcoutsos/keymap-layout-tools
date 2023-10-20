@@ -16,7 +16,7 @@ import {
   DragSelectStyleSwitcher,
   DRAG_MODE_REMOVE,
   useDragSelector
-} from './DragSelector/DragSelector.jsx'
+} from '../Common/DragSelector/DragSelector.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
 import styles from './reorder.module.css'

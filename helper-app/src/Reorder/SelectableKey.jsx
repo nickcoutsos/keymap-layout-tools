@@ -4,7 +4,7 @@ import {
   DRAG_MODE_ADD,
   DRAG_MODE_REMOVE,
   useDragContext
-} from './DragSelector/DragSelector.jsx'
+} from '../Common/DragSelector/DragSelector.jsx'
 import { useReorderContext } from './Context.js'
 import keyStyles from './key.module.css'
 import Key from '../Key.jsx'
