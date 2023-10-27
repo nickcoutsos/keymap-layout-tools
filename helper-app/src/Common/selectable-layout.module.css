@@ -1,0 +1,11 @@
+.layoutWrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.usageGuide {
+  font-size: 80%;
+  font-style: italic;
+  opacity: 0.9;
+}

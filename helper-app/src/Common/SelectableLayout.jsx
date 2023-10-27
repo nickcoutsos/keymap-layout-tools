@@ -11,6 +11,7 @@ import {
 } from './DragSelector/DragSelector.jsx'
 import Layout from './Layout.jsx'
 import SelectableKey from './SelectableKey.jsx'
+import styles from './selectable-layout.module.css'
 
 const DEFAULT_SCALE = 0.6
 
@@ -63,26 +64,37 @@ export default function SelectableLayout ({ layout, selection, onUpdate, onHover
   const dragProps = useDragSelector(keyPolygons, handleDragSelect)
 
   return (
-    <div style={{ position: 'relative', width: 'fit-content' }}>
-      <DragSelectContainer {...dragProps}>
-        <SelectionContextProvider selection={selection}>
-          <Layout
-            layout={layout}
-            scale={scale}
-            renderKey={({ index, keyLayout }) => (
-              <SelectableKey
-                index={index}
-                keyLayout={keyLayout}
-                onClick={event => handleClickSelect(event, index)}
-                onMouseEnter={() => onHover(index)}
-                onMouseLeave={() => onHover(null)}
-              />
-            )}
-            {...rest}
-          />
-        </SelectionContextProvider>
-      </DragSelectContainer>
-    </div>
+    <>
+      <div className={styles.layoutWrapper}>
+        <DragSelectContainer {...dragProps}>
+          <SelectionContextProvider selection={selection}>
+            <Layout
+              layout={layout}
+              scale={scale}
+              renderKey={({ index, keyLayout }) => (
+                <SelectableKey
+                  index={index}
+                  keyLayout={keyLayout}
+                  onClick={event => handleClickSelect(event, index)}
+                  onMouseEnter={() => onHover(index)}
+                  onMouseLeave={() => onHover(null)}
+                />
+              )}
+              {...rest}
+            />
+          </SelectionContextProvider>
+        </DragSelectContainer>
+      </div>
+      <p className={styles.usageGuide}>
+        Click or drag-select keys to highlight their corresponding JSON
+        definitions. {dragProps.selecting && (
+          <span>
+            Hold <kbd>Shift</kbd> to add keys to the current selection, or
+            hold <kbd>Alt</kbd> to remove keys from the current selection.
+          </span>
+      )}
+      </p>
+    </>
   )
 }
 
@@ -91,22 +103,24 @@ export function useSelectionContext () {
 }
 
 function SelectionContextProvider ({ selection, children }) {
-  const { dragMode, intersections } = useDragContext()
+  const { dragMode, selecting, intersections } = useDragContext()
   const previewSelection = useMemo(() => {
-    if (dragMode === DRAG_MODE_REMOVE) {
+    if (!selecting || dragMode === DRAG_MODE_REMOVE) {
       return []
     }
 
     return intersections
-  }, [dragMode, intersections])
+  }, [dragMode, selecting, intersections])
 
   const previewDeselection = useMemo(() => {
-    if (dragMode !== DRAG_MODE_REMOVE) {
+    if (!selecting || dragMode === DRAG_MODE_ADD) {
       return []
     }
 
-    return selection.filter(index => intersections.includes(index))
-  }, [dragMode, selection, intersections])
+    return dragMode === DRAG_MODE_REPLACE
+      ? selection.filter(index => !intersections.includes(index))
+      : selection.filter(index => intersections.includes(index))
+  }, [dragMode, selecting, selection, intersections])
 
   const context = {
     selection,

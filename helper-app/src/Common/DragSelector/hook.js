@@ -20,6 +20,8 @@ export const DRAG_MODE_ADD = 'add'
 export const DRAG_MODE_REMOVE = 'remove'
 export const DRAG_MODE_REPLACE = 'replace'
 
+const _DEFAULT_DRAG_MODE = DRAG_MODE_REPLACE
+
 export const DRAG_STYLE_BOX = 'box'
 export const DRAG_STYLE_PATH = 'path'
 
@@ -41,7 +43,6 @@ export function useDragSelector (polygons, onSelect) {
 
   const {
     setStyle,
-    setMode,
     beginDrag,
     endDrag,
     drag
@@ -70,18 +71,6 @@ export function useDragSelector (polygons, onSelect) {
     setStyle(style)
   ), [setStyle])
 
-  const handleKeyDown = useCallback(event => {
-    if (mode === DRAG_MODE_ADD && event.shiftKey) {
-      setMode(DRAG_MODE_REMOVE)
-    }
-  }, [mode, setMode])
-
-  const handleKeyUp = useCallback(event => {
-    if (mode === DRAG_MODE_REMOVE && !event.shiftKey) {
-      setMode(DRAG_MODE_ADD)
-    }
-  }, [mode, setMode])
-
   const handleMouseDown = useCallback(event => {
     const offsetElement = getRelativeAncestor(event.target)
     const rect = offsetElement.getBoundingClientRect()
@@ -93,7 +82,7 @@ export function useDragSelector (polygons, onSelect) {
 
   const handleMouseMove = useCallback(event => {
     if (start) {
-      drag(event.clientX, event.clientY)
+      drag(event.clientX, event.clientY, getDragModeFromEvent(event))
     }
   }, [start, drag])
 
@@ -112,15 +101,11 @@ export function useDragSelector (polygons, onSelect) {
   useEffect(() => {
     window.addEventListener('mouseup', handleMouseUp)
     window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('keyup', handleKeyUp)
     return () => {
       window.removeEventListener('mouseup', handleMouseUp)
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [handleMouseUp, handleMouseMove, handleKeyDown, handleKeyUp])
+  }, [handleMouseUp, handleMouseMove])
 
   return {
     ...state,
@@ -132,18 +117,26 @@ export function useDragSelector (polygons, onSelect) {
   }
 }
 
+function getDragModeFromEvent (event) {
+  if (event.shiftKey) {
+    return DRAG_MODE_ADD
+  } else if (event.altKey) {
+    return DRAG_MODE_REMOVE
+  }
+
+  return DRAG_MODE_REPLACE
+}
+
 function useDragStateReducer () {
   const [state, dispatch] = useReducer(reducer, null, createInitialState)
 
   const setStyle = useCallback(style => dispatch({ type: 'set_style', style }), [dispatch])
-  const setMode = useCallback(mode => dispatch({ type: 'set_mode', mode }), [dispatch])
   const beginDrag = useCallback((startPoint, offsetRect) => dispatch({ type: 'begin', startPoint, offsetRect }), [dispatch])
   const endDrag = useCallback(() => dispatch({ type: 'end' }), [dispatch])
-  const drag = useCallback((clientX, clientY) => dispatch({ type: 'drag', clientX, clientY }), [dispatch])
+  const drag = useCallback((clientX, clientY, mode) => dispatch({ type: 'drag', clientX, clientY, mode }), [dispatch])
 
   const actions = {
     setStyle,
-    setMode,
     beginDrag,
     endDrag,
     drag
@@ -155,7 +148,7 @@ function useDragStateReducer () {
 function createInitialState () {
   return {
     style: DRAG_STYLE_BOX,
-    mode: DRAG_MODE_ADD,
+    mode: _DEFAULT_DRAG_MODE,
     start: null,
     trail: null,
     rect: null,
@@ -167,9 +160,6 @@ function reducer (state, action) {
   switch (action.type) {
     case 'set_style':
       return { ...state, style: action.style }
-
-    case 'set_mode':
-      return { ...state, mode: action.mode }
 
     case 'begin':
       return {
@@ -185,6 +175,7 @@ function reducer (state, action) {
     case 'end':
       return {
         ...state,
+        mode: _DEFAULT_DRAG_MODE,
         start: null,
         negate: false,
         trail: null,
@@ -194,6 +185,7 @@ function reducer (state, action) {
     case 'drag':
       return {
         ...state,
+        mode: action.mode || state.mode,
         rect: getDragRect(state, action),
         trail: getDragTrail(state, action)
       }

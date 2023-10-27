@@ -56,13 +56,11 @@ function App () {
               out using the positon, rotation, and size properties of your layout.
             </em>
           </p>
-          <div style={{ margin: '0 auto', width: 'fit-content' }}>
-            <KeyboardLayout
-              layout={layout}
-              renderKey={Key}
-              scale={scale}
-            />
-          </div>
+          <KeyboardLayout
+            layout={layout}
+            renderKey={Key}
+            scale={scale}
+          />
         </div>
       </div>
     </>

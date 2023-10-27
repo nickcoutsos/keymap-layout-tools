@@ -32,7 +32,7 @@ export function DragSelectContainer (props) {
         { [styles.selecting]: selecting }
       )}
     >
-      <DragContext.Provider value={{ dragMode: mode, intersections }}>
+      <DragContext.Provider value={{ dragMode: mode, intersections, selecting }}>
         {children}
         {selecting && style === DRAG_STYLE_BOX && <DragBox {...props} />}
         {selecting && style === DRAG_STYLE_PATH && <DragTrail {...props} />}
