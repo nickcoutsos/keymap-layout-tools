@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep.js'
 import { useMemo } from 'react'
 
 import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
@@ -6,8 +7,15 @@ import { toOrigin } from 'keymap-layout-tools/lib/modifiers.js'
 import Key from '../Key.jsx'
 import KeyPlacer from '../KeyPlacer.jsx'
 
-export default function Layout ({ layout: original, scale, overrides, renderKey, renderOverlay }) {
-  const layout = useMemo(() => original && toOrigin(original), [original])
+export default function Layout ({ layout: original, scale, normalize, overrides, renderKey, renderOverlay }) {
+  const layout = useMemo(() => (
+    original && (
+      normalize
+        ? toOrigin(original)
+        : cloneDeep(original)
+    )
+  ), [normalize, original])
+
   const wrapperStyle = useMemo(() => (
     layout && getWrapperStyle(layout, { scale, overrides })
   ), [layout, scale, overrides])
@@ -28,6 +36,7 @@ export default function Layout ({ layout: original, scale, overrides, renderKey,
 
 Layout.defaultProps = {
   scale: 0.4,
+  normalize: true,
   overrides: {},
   renderKey: defaultRenderKey,
   renderOverlay: defaultRenderOverlay
