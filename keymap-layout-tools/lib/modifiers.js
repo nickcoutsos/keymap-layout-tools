@@ -119,7 +119,7 @@ export function mirror (layout, { gap = 0, referenceOriginal = false } = {}) {
     ...flippedRows[i].map(key => {
       const mirroredKey = { ...key }
       mirroredKey.x = key.x + maxX + gap
-      mirroredKey.col = key.col + maxCol + Math.ceil(gap)
+      mirroredKey.col = key.col + maxCol + Math.ceil(gap) + 1
 
       if ('rx' in mirroredKey) {
         mirroredKey.rx = mirroredKey.rx + maxX + gap
