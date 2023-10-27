@@ -8,7 +8,7 @@ export function getRelativeAncestor (element) {
   // using cloneElement or something, I don't know.
   while (
     (element = element.parentNode) &&
-    (element.style.position !== 'relative' || !element.getBoundingClientRect().height)
+    (window.getComputedStyle(element).position !== 'relative' || !element.getBoundingClientRect().height)
   );
 
   return element

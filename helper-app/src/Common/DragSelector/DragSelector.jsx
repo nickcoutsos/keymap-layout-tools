@@ -2,11 +2,18 @@ import classNames from 'classnames'
 import { useCallback } from 'react'
 
 import styles from './dragSelector.module.css'
-import { DragContext, DRAG_MODE_REMOVE, DRAG_STYLE_BOX, DRAG_STYLE_PATH } from './hook.js'
+
+import {
+  DragContext,
+  DRAG_MODE_REMOVE,
+  DRAG_STYLE_BOX,
+  DRAG_STYLE_PATH
+} from './hook.js'
 
 export {
   DRAG_MODE_ADD,
   DRAG_MODE_REMOVE,
+  DRAG_MODE_REPLACE,
   DRAG_STYLE_BOX,
   DRAG_STYLE_PATH,
   useDragContext,
