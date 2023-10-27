@@ -1,19 +1,16 @@
-import classNames from 'classnames'
 import isEqual from 'lodash/isEqual'
 import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
 import { useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import Layout from './Common/Layout.jsx'
 import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
-import Key from './Key.jsx'
-import styles from './styles.module.css'
 import {
   updateKeySelection,
   selectKeySelection
 } from './metadataSlice.js'
+import SelectableLayout from './Common/SelectableLayout.jsx'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -38,32 +35,18 @@ function KeyboardLayout (props) {
     }, [])
   )
 
-  const toggleSelection = useCallback((event, index) => {
-    event.preventDefault()
-    event.stopPropagation()
-    dispatch(updateKeySelection({
-      keys: selectedKeys.includes(index) ? [] : [index],
-      append: event.shiftKey
-    }))
-  }, [selectedKeys, dispatch])
+  const handleSelectionUpdate = useCallback(keys => {
+    dispatch(updateKeySelection({ keys }))
+  }, [dispatch])
 
   return (
     <>
-      <Layout
+      <SelectableLayout
         layout={layout}
         scale={scale}
-        renderKey={({ keyLayout, index }) => (
-          <Key
-            index={index}
-            keyLayout={keyLayout}
-            className={classNames({
-              [styles.selected]: selectedKeys.includes(index)
-            })}
-            onMouseEnter={() => setHovering(index)}
-            onMouseLeave={() => setHovering(null)}
-            onClick={event => toggleSelection(event, index)}
-          />
-        )}
+        selection={selectedKeys}
+        onUpdate={handleSelectionUpdate}
+        onHover={setHovering}
         renderOverlay={(layout) => (
           rotating && rotating.map(({ index }) => (
             <RotationOriginHelper

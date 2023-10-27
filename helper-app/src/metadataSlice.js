@@ -15,6 +15,34 @@ const initialState = {
   selectedLayout: null
 }
 
+export const selectMetadata = state => state.metadata
+
+export const selectActiveLayout = state => state.metadata.selectedLayout
+
+export const selectLayout = state => {
+  const { parsed, selectedLayout } = state.metadata
+  if (!parsed) {
+    return null
+  }
+
+  if (isRawLayout(parsed)) {
+    return parsed
+  }
+
+  return (
+    parsed.layouts[selectedLayout]?.layout ||
+    Object.values(parsed.layouts)[0].layout
+  )
+}
+
+export const selectLayoutNames = state => (
+  isRawLayout(state.metadata.parsed)
+    ? []
+    : Object.keys(state.metadata.parsed.layouts)
+)
+
+export const selectKeySelection = state => state.metadata.keySelection
+
 const metadataSlice = createSlice({
   name: 'metadata',
   initialState,
@@ -102,7 +130,8 @@ export const updateMetadata = createAsyncThunk(
 export const formatText = createAsyncThunk(
   'metadata/format',
   (_, { dispatch, getState }) => {
-    const { parsed } = getState()
+    const { metadata } = getState()
+    const { parsed } = metadata
     const formatted = formatMetadata(parsed)
     dispatch(updateMetadata({ text: formatted }))
   }
@@ -111,7 +140,8 @@ export const formatText = createAsyncThunk(
 export const generateMetadata = createAsyncThunk(
   'metadata/wrap',
   (_, { dispatch, getState }) => {
-    const { parsed } = getState()
+    const { metadata } = getState()
+    const { parsed } = metadata
     if (isRawLayout(parsed)) {
       dispatch(updateMetadata({
         metadata: normalize(parsed)
@@ -120,32 +150,17 @@ export const generateMetadata = createAsyncThunk(
   }
 )
 
-export const selectMetadata = state => state.metadata
+export const removeSelectedKeys = createAsyncThunk(
+  'metadata/removeSelectedKeys',
+  (_, { dispatch, getState }) => {
+    const state = getState()
+    const keySelection = selectKeySelection(state)
+    const layout = selectLayout(state)
 
-export const selectActiveLayout = state => state.metadata.selectedLayout
-
-export const selectLayout = state => {
-  const { parsed, selectedLayout } = state.metadata
-  if (!parsed) {
-    return null
+    dispatch(updateMetadata({
+      layout: layout.filter((_, index) => !keySelection.includes(index))
+    }))
   }
-
-  if (isRawLayout(parsed)) {
-    return parsed
-  }
-
-  return (
-    parsed.layouts[selectedLayout]?.layout ||
-    Object.values(parsed.layouts)[0].layout
-  )
-}
-
-export const selectLayoutNames = state => (
-  isRawLayout(state.metadata.parsed)
-    ? []
-    : Object.keys(state.metadata.parsed.layouts)
 )
-
-export const selectKeySelection = state => state.metadata.keySelection
 
 export default metadataSlice.reducer

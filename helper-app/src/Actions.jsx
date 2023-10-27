@@ -9,7 +9,9 @@ import {
   selectLayout,
   selectLayoutNames,
   selectMetadata,
-  updateMetadata
+  selectKeySelection,
+  updateMetadata,
+  removeSelectedKeys
 } from './metadataSlice'
 import { isRawLayout } from './Code/util'
 import Reorder from './Reorder/Reorder.jsx'
@@ -19,6 +21,7 @@ import MirrorDialog from './MirrorDialog/MirrorDialog.jsx'
 export default function Actions () {
   const dispatch = useDispatch()
   const layout = useSelector(selectLayout)
+  const selectedKeys = useSelector(selectKeySelection)
   const [modal, setModal] = useState(null)
   const close = useCallback(() => setModal(null), [setModal])
 
@@ -34,6 +37,11 @@ export default function Actions () {
       <button onClick={() => setModal('mirror')}>
         Mirror
       </button>
+      {selectedKeys.length > 0 && (
+        <button onClick={() => dispatch(removeSelectedKeys())}>
+          Delete selected keys
+        </button>
+      )}
 
       {modal === 'reorder' && (
         <Reorder

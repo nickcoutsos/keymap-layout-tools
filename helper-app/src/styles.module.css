@@ -1,7 +1,10 @@
 .actions {
+  position: fixed;
   display: flex;
+  z-index: 10;
   gap: 4px;
   margin: 5px 0;
+  padding: 0 15px;
 }
 
 .container {
@@ -9,6 +12,8 @@
   flex-direction: row;
   gap: 15px;
   height: 100vh;
+  padding-top: 2em;
+  box-sizing: border-box;
 }
 
 .code {
