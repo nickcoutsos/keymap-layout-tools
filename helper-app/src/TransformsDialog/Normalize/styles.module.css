@@ -1,0 +1,45 @@
+.normalizeWrapper {
+  --original: tomato;
+  --normalized: royalblue;
+}
+
+.axes {
+  width: 100px;
+  height: 100px;
+  z-index: 10;
+  position: relative;
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(to right, transparent 48%, var(--key-color-extreme) 48%, var(--key-color-extreme) 53%, transparent 53%),
+    linear-gradient(to bottom, transparent 48%, var(--key-color-extreme) 48%, var(--key-color-extreme) 53%, transparent 53%);
+}
+
+.legend {
+  display: inline-block;
+  transform: none;
+  width: 1em;
+  height: 1em;
+  vertical-align: baseline;
+}
+
+.original {
+  background: var(--original);
+  opacity: 0.25;
+}
+
+.normalized {
+  background: var(--normalized);
+  opacity: 0.5;
+}
+
+.messageOverlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  background: rgba(0, 0, 0, .1);
+  padding: 15px;
+  border-radius: 2em;
+  backdrop-filter: blur(10px);
+}

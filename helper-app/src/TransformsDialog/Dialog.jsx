@@ -3,7 +3,7 @@ import isEqual from 'lodash/isEqual.js'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { Dialog, DialogHeading } from '../Common/Dialog.jsx'
+import { Dialog, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
 import Modal from '../Common/Modal.jsx'
 import { selectLayout } from '../metadataSlice'
 import { transformers } from './transforms.jsx'
@@ -21,7 +21,7 @@ export default function TransformsDialog ({ onSubmit, onClose }) {
     !isEqual(initialLayout, modifiedLayout)
   ), [initialLayout, modifiedLayout])
 
-  const { component: Component } = transformers[selectedTransformer]
+  const { notes, component: Component } = transformers[selectedTransformer]
 
   return (
     <Modal onDismiss={onClose}>
@@ -38,9 +38,17 @@ export default function TransformsDialog ({ onSubmit, onClose }) {
           </select></h2>
         </DialogHeading>
 
+        {notes && (
+          <DialogNote>
+            {notes}
+          </DialogNote>
+        )}
+
         <Component
           layout={initialLayout}
-          onUpdate={setModifiedLayout}
+          onUpdate={layout => {
+            setModifiedLayout(layout)
+          }}
         />
 
         <div style={{ textAlign: 'center', margin: '20px 0 5px' }}>
