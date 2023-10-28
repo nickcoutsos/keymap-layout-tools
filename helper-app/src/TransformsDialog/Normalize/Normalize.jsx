@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import isEqual from 'lodash/isEqual.js'
+import isEqualWith from 'lodash/isEqualWith.js'
 import { useEffect, useMemo } from 'react'
 
 import Layout from '../../Common/Layout.jsx'
@@ -17,7 +17,7 @@ export default function Normalize ({ layout, onUpdate }) {
   ), [layout])
 
   const alreadyNormalized = useMemo(() => (
-    isEqual(layout, normalized)
+    isCloseToEqual(layout, normalized)
   ), [layout, normalized])
 
   // Combine both versions to render in the same coordinate space
@@ -63,7 +63,10 @@ export default function Normalize ({ layout, onUpdate }) {
         <li><span className={classNames(styles.legend, styles.original)} /> Original layout</li>
         <li><span className={classNames(styles.legend, styles.normalized)} /> Shifted layout</li>
       </ul>
-      <div style={{ height: `${SCALE * (bboxCombined.max.y - bboxCombined.min.y)}px` }}>
+      <div style={{
+        height: `${SCALE * (bboxCombined.max.y - bboxCombined.min.y)}px`,
+        margin: '30px 0 10px'
+      }}>
         <Layout
           layout={combined}
           scale={SCALE}
@@ -96,6 +99,14 @@ export default function Normalize ({ layout, onUpdate }) {
       </div>
     </div>
   )
+}
+
+function isCloseToEqual (layoutA, layoutB) {
+  return isEqualWith(layoutA, layoutB, (valA, valB) => {
+    return (typeof valA === 'number' && typeof valB === 'number')
+      ? Math.abs(valA - valB) < Number.EPSILON
+      : undefined
+  })
 }
 
 function BoundingBox ({ bbox, offset, color }) {

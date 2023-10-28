@@ -3,7 +3,7 @@ import isEqual from 'lodash/isEqual.js'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { Dialog, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
+import { Button, Dialog, DialogActions, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
 import Modal from '../Common/Modal.jsx'
 import { selectLayout } from '../metadataSlice'
 import { transformers } from './transforms.jsx'
@@ -51,17 +51,17 @@ export default function TransformsDialog ({ onSubmit, onClose }) {
           }}
         />
 
-        <div style={{ textAlign: 'center', margin: '20px 0 5px' }}>
-          <button
+        <DialogActions>
+          <Button
             onClick={() => onSubmit(modifiedLayout)}
             disabled={!isModified}
           >
             Apply
-          </button>
-          <button style={{ background: 'none', border: 'none' }} onClick={onClose}>
+          </Button>
+          <Button onClick={onClose} secondary>
             {isModified ? <span>Cancel</span> : <span>Close</span>}
-          </button>
-        </div>
+          </Button>
+        </DialogActions>
       </Dialog>
     </Modal>
   )

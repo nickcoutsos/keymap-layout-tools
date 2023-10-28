@@ -25,3 +25,21 @@ export function DialogNote ({ children, className = '', ...props }) {
     </div>
   )
 }
+
+export function DialogActions ({ children, className = '' }) {
+  return (
+    <div className={classNames(styles.dialogActionBar, className)}>
+      {children}
+    </div>
+  )
+}
+
+export function Button ({ className, secondary, children, ...props }) {
+  return (
+    <button {...props} className={classNames(className, styles.actionButton, {
+      [styles.secondary]: secondary
+    })}>
+      {children}
+    </button>
+  )
+}

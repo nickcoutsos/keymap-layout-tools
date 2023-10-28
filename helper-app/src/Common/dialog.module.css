@@ -11,6 +11,25 @@
   border: 0.25px solid rgba(0, 0, 0, 0.4);
 }
 
+.dialogActionBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 5px;
+  margin: 20px 0 5px;
+}
+
+.actionButton:hover {
+  cursor: pointer;
+}
+.actionButton.secondary {
+  background: none;
+  border: none;
+}
+.actionButton.secondary:hover {
+  color: royalblue;
+}
+
 .heading {
   position: sticky;
   top: 0px;
