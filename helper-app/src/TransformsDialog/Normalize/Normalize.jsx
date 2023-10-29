@@ -68,7 +68,7 @@ export default function Normalize ({ layout, onUpdate }) {
         margin: '30px 0 10px'
       }}>
         <Layout
-          layout={combined}
+          layout={layout}
           scale={SCALE}
           overrides={{ margin: '0 auto' }}
           renderKey={({ keyLayout, index }) => (
