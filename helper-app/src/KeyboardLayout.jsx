@@ -11,6 +11,7 @@ import {
   selectKeySelection
 } from './metadataSlice.js'
 import SelectableLayout from './Common/SelectableLayout.jsx'
+import TranslationHelper from './LayoutHelpers/Translation/TranslationHelper.jsx'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -48,13 +49,20 @@ function KeyboardLayout (props) {
         onUpdate={handleSelectionUpdate}
         onHover={setHovering}
         renderOverlay={(layout) => (
-          rotating && rotating.map(({ index }) => (
-            <RotationOriginHelper
-              key={index}
-              showArc={index === hovering}
-              keyLayout={layout[index]}
-            />
-          ))
+          <>
+            {rotating && rotating.map(({ index }) => (
+              <RotationOriginHelper
+                key={index}
+                showArc={index === hovering}
+                keyLayout={layout[index]}
+              />
+            ))}
+            {/* <TranslationHelper
+              layout={layout}
+              scale={scale}
+              keyIndices={selectedKeys}
+            /> */}
+          </>
         )}
       />
     </>

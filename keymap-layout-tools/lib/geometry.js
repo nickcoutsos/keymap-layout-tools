@@ -16,6 +16,16 @@ export function getComputedParams (position, size, rotation = {}, options = {}) 
   }
 }
 
+// I hate this so much, I need to update function signatures to just take the
+// `keyLayout` type and do this in one place.
+export function getPositionSizeRotation (key) {
+  return [
+    { x: key.x, y: key.y },
+    { u: key.u || key.w || 1, h: key.h || 1 },
+    { x: key.rx, y: key.ry, a: key.r }
+  ]
+}
+
 export function getKeyStyles (position, size, rotation, options = {}) {
   const { x, y, u, h, a, rx, ry } = getComputedParams(position, size, rotation, options)
   const { padding: p = DEFAULT_PADDING } = options

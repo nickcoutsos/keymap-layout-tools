@@ -1,0 +1,43 @@
+.axesContainer {
+  position: relative;
+}
+
+.origin {
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: var(--fg);
+}
+
+.axis {
+  --length: 100px;
+  --thickness: 8px;
+  --half-thickness: 4px;
+  --offset: -4px, -4px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: var(--length);
+  height: var(--thickness);
+  border-radius: var(--half-thickness);
+
+  transform-origin: 0 0;
+  transform: translate(var(--offset));
+  opacity: 0.6;
+}
+
+.axis:hover {
+  cursor: grab;
+  opacity: 1;
+}
+
+.axis[data-axis="x"] { background-color: red }
+.axis[data-axis="y"] {
+  background-color: mediumseagreen;
+  transform: rotate(90deg) translate(var(--offset));
+}
