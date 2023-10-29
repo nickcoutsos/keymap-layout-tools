@@ -18,7 +18,7 @@ function Key ({ index, keyLayout, className = '', ...props }) {
 
 Key.propTypes = {
   index: PropTypes.any.isRequired,
-  keyLayout: keyboardLayoutPropTypes.keyLayout.isRequired,
+  keyLayout: keyboardLayoutPropTypes.keyLayout,
   className: PropTypes.string
 }
 
