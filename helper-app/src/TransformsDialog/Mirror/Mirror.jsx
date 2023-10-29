@@ -7,6 +7,7 @@ import Key from '../../Key.jsx'
 import Options, { DEFAULT_OPTIONS } from './Options.jsx'
 import { useMirrorTransform } from './hooks'
 import styles from './styles.module.css'
+import keyStyles from '../../key-styles.module.css'
 
 export default function Mirror ({ layout, onUpdate }) {
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -44,7 +45,7 @@ function renderSwitch ({ keyLayout, index }) {
       index={index}
       keyLayout={keyLayout}
       className={classNames({
-        [styles.mirroredKey]: keyLayout._duplicate
+        [keyStyles.ghost]: keyLayout._duplicate
       })}
     />
   )

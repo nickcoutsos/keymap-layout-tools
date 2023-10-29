@@ -37,23 +37,3 @@
   width: 100% !important;
   height: 100% !important;
 }
-
-.key {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  font-family: monospace;
-  font-size: 150%;
-  border-radius: 5px;
-  box-sizing: border-box;
-  color: var(--key-color-base);
-  background-color: var(--key-bg-base);
-  box-sizing: border-box;
-  cursor: default;
-}
-.key.selected {
-  background-color: royalblue;
-  color: white;
-}

@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import styles from './styles.module.css'
+
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
+import styles from './key-styles.module.css'
 
 function Key ({ index, keyLayout, className = '', ...props }) {
   const classes = classNames(

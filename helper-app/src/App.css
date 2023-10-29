@@ -1,10 +1,16 @@
 :root {
   --bg: white;
+  --bg-rgb: 255,255,255;
   --fg: black;
- --link: royalblue;
+  --fg-rgb: 0,0,0;
+  --selection: royalblue;
+  --selection-rgb: 65,105,225;
+  --link: royalblue;
   --link-hover: #6d99c6;
   --key-bg-base: #f2f2f2;
+  --key-bg-rgb: 242, 242, 242;
   --key-color-base: #6f6f6f;
+  --key-color-rgb: 111,111,111;
   --key-color-extreme: #313131;
   --code-bg: rgba(0, 0, 0, 0.1);
   --dialog-bg: white;
@@ -14,11 +20,14 @@
     color-scheme: dark;
     --code-bg: rgba(255, 255, 255, 0.1);
     --fg: white;
+    --fg-rgb: 255,255,255;
     --bg: hsl(211, 20%, 18%);
     --bg-rgb: 17,34,51;
     --dialog-bg: hsl(210, 30%, 17%);
     --key-bg-base: hsl(208.2, 23%, 25%);
+    --key-bg-rgb: 49, 65, 78;
     --key-color-base: hsl(0, 0%, 90%);
+    --key-color-rgb: 230,230,230;
     --key-color-extreme: #e7e7e7;
   }
 }

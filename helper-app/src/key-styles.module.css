@@ -1,0 +1,25 @@
+.key {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: monospace;
+  font-size: 150%;
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: var(--key-color-base);
+  background-color: var(--key-bg-base);
+  box-sizing: border-box;
+  cursor: default;
+}
+
+.key.selected {
+  background-color: royalblue;
+  color: white;
+}
+
+.ghost {
+  color: rgba(var(--key-color-rgb), 0.4);
+  background: rgba(var(--key-bg-rgb), 0.4);
+}
