@@ -37,3 +37,9 @@
   width: 100% !important;
   height: 100% !important;
 }
+
+.usageGuide {
+  font-size: 80%;
+  font-style: italic;
+  opacity: 0.9;
+}

@@ -12,6 +12,7 @@ import {
 } from './metadataSlice.js'
 import SelectableLayout from './Common/SelectableLayout.jsx'
 import TranslationHelper from './LayoutHelpers/Translation/TranslationHelper.jsx'
+import styles from './styles.module.css'
 
 function matchRotations (keyA, keyB) {
   return isEqual(
@@ -65,6 +66,11 @@ function KeyboardLayout (props) {
           </>
         )}
       />
+      <p className={styles.usageGuide}>
+        Click or drag-select keys to highlight their corresponding JSON
+        definitions. Hold <kbd>Shift</kbd> to add keys to the current selection,
+        or hold <kbd>Alt</kbd> to remove keys from the current selection.
+      </p>
     </>
   )
 }

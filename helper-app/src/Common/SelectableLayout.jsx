@@ -85,15 +85,6 @@ export default function SelectableLayout ({ layout, selection, onUpdate, onHover
           </SelectionContextProvider>
         </DragSelectContainer>
       </div>
-      <p className={styles.usageGuide}>
-        Click or drag-select keys to highlight their corresponding JSON
-        definitions. {dragProps.selecting && (
-          <span>
-            Hold <kbd>Shift</kbd> to add keys to the current selection, or
-            hold <kbd>Alt</kbd> to remove keys from the current selection.
-          </span>
-      )}
-      </p>
     </>
   )
 }
