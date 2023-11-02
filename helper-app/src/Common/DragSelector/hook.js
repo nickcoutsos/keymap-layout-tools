@@ -106,6 +106,7 @@ export function useDragSelector (polygons, onSelect) {
 
   return {
     ...state,
+    ...actions,
     boundingBox,
     selecting,
     intersections,

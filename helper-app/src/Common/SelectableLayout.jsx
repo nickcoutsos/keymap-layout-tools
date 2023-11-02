@@ -15,13 +15,39 @@ import styles from './selectable-layout.module.css'
 
 const DEFAULT_SCALE = 0.6
 
-const SelectionContext = createContext({
+export const SelectionContext = createContext({
   selection: [],
   previewSelection: [],
   previewDeselection: []
 })
 
-export default function SelectableLayout ({ layout, selection, onUpdate, onHover, scale = DEFAULT_SCALE, ...rest }) {
+export function SelectableLayout ({ dragProps, selectionContextProps, layoutProps }) {
+  return (
+    <div className={styles.layoutWrapper}>
+      <DragSelectContainer {...dragProps}>
+        <SelectionContextProvider {...selectionContextProps}>
+          <Layout {...layoutProps } />
+        </SelectionContextProvider>
+      </DragSelectContainer>
+    </div>
+  )
+}
+
+export default function ConnectedSelectableLayout ({ layout, selection, onUpdate, onHover, scale = DEFAULT_SCALE, ...rest }) {
+  const props = useSelectableLayoutProps(layout, scale, selection, onUpdate, onHover)
+
+  return (
+    <SelectableLayout
+      {...props}
+      layoutProps={{
+        ...props.layoutProps,
+        ...rest
+      }}
+    />
+  )
+}
+
+export function useSelectableLayoutProps (layout, scale, selection, onUpdate, onHover) {
   const keyPolygons = useMemo(() => (
     layout.map(key => transformKeyPolygon(
       { x: key.x, y: key.y },
@@ -63,30 +89,29 @@ export default function SelectableLayout ({ layout, selection, onUpdate, onHover
 
   const dragProps = useDragSelector(keyPolygons, handleDragSelect)
 
-  return (
-    <>
-      <div className={styles.layoutWrapper}>
-        <DragSelectContainer {...dragProps}>
-          <SelectionContextProvider selection={selection}>
-            <Layout
-              layout={layout}
-              scale={scale}
-              renderKey={({ index, keyLayout }) => (
-                <SelectableKey
-                  index={index}
-                  keyLayout={keyLayout}
-                  onClick={event => handleClickSelect(event, index)}
-                  onMouseEnter={() => onHover(index)}
-                  onMouseLeave={() => onHover(null)}
-                />
-              )}
-              {...rest}
-            />
-          </SelectionContextProvider>
-        </DragSelectContainer>
-      </div>
-    </>
-  )
+  const selectionContextProps = { selection }
+
+  const layoutProps = useMemo(() => ({
+    layout,
+    scale,
+    renderKey: ({ index, keyLayout }) => (
+      <SelectableKey
+        index={index}
+        keyLayout={keyLayout}
+        onClick={event => handleClickSelect(event, index)}
+        onMouseEnter={() => onHover(index)}
+        onMouseLeave={() => onHover(null)}
+      >
+        {index}
+      </SelectableKey>
+    )
+  }), [layout, scale, handleClickSelect, onHover])
+
+  return {
+    dragProps,
+    selectionContextProps,
+    layoutProps
+  }
 }
 
 export function useSelectionContext () {
