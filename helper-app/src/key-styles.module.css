@@ -14,8 +14,20 @@
   cursor: default;
 }
 
-.key.selected {
-  background-color: royalblue;
+.preview {
+  border: 2px solid royalblue;
+}
+.selected.previewDeselect {
+  background-color: hsla(225, 73%, 57%, 0.103);
+}
+
+.selectable:hover {
+  border: 1px solid royalblue;
+  cursor: pointer;
+}
+.selected {
+  background: royalblue;
+  border: 2px solid royalblue;
   color: white;
 }
 

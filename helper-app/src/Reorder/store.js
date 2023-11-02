@@ -20,12 +20,11 @@ export function useReorderStore (layout) {
   const prevGroup = useCallback(() => dispatch({ type: 'PREV_GROUP' }), [dispatch])
   const selectRow = useCallback(index => dispatch({ type: 'SELECT_ROW', index }), [dispatch])
   const selectCol = useCallback(index => dispatch({ type: 'SELECT_COL', index }), [dispatch])
-  const addToSelected = useCallback(index => dispatch({ type: 'ADD_TO_SELECTED', index }), [dispatch])
-  const removeFromSelected = useCallback(index => dispatch({ type: 'REMOVE_FROM_SELECTED', index }), [dispatch])
+  const updateSelection = useCallback((index, mode) => dispatch({ type: 'UPDATE_SELECTION', index, mode }), [dispatch])
 
   const actions = useMemo(
-    () => ({ reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup, nextGroup, prevGroup }),
-    [reset, clear, reorder, selectRow, selectCol, addToSelected, removeFromSelected, addGroup, removeGroup, nextGroup, prevGroup]
+    () => ({ reset, clear, reorder, selectRow, selectCol, updateSelection, addGroup, removeGroup, nextGroup, prevGroup }),
+    [reset, clear, reorder, selectRow, selectCol, updateSelection, addGroup, removeGroup, nextGroup, prevGroup]
   )
 
   return [state, actions]
@@ -47,11 +46,8 @@ function reducer (state, action) {
     case 'REORDER':
       return reorderGroups(state, action.keyCenters)
 
-    case 'ADD_TO_SELECTED':
-      return updateMembers(state, action.index, true)
-
-    case 'REMOVE_FROM_SELECTED':
-      return updateMembers(state, action.index, false)
+    case 'UPDATE_SELECTION':
+      return updateMembers(state, action.index, action.mode)
 
     case 'SELECT_ROW':
       return {
@@ -149,28 +145,40 @@ function reorderGroups (state, keyCenters) {
   }
 }
 
-function updateMembers (state, index, adding) {
+function updateMembers (state, index, mode) {
   const { selectionMode, selection } = state
   const group = state[selectionMode]
   const indices = [].concat(index)
 
-  if (!adding) {
-    return {
-      ...state,
-      [selectionMode]: group.map((section, i) => (
-        i === selection
-          ? difference(section, indices)
-          : section
-      ))
-    }
-  }
-
-  return {
-    ...state,
-    [selectionMode]: group.map((section, i) => (
-      i === selection
-        ? uniq([...section, ...indices])
-        : difference(section, indices)
-    ))
+  switch (mode) {
+    case 'add':
+      return {
+        ...state,
+        [selectionMode]: group.map((section, i) => (
+          i === selection
+            ? uniq([...section, ...indices])
+            : difference(section, indices)
+        ))
+      }
+    case 'remove':
+      return {
+        ...state,
+        [selectionMode]: group.map((section, i) => (
+          i === selection
+            ? difference(section, indices)
+            : section
+        ))
+      }
+    case 'replace':
+      return {
+        ...state,
+        [selectionMode]: group.map((section, i) => (
+          i === selection
+            ? [...indices]
+            : difference(section, indices)
+        ))
+      }
+    default:
+      throw new Error(`Unknown mode ${mode}`)
   }
 }

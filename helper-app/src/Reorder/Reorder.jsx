@@ -7,20 +7,15 @@ import { transformKeyPolygon } from 'keymap-layout-tools/lib/geometry.js'
 import { setFixedPrecision, toOrigin } from 'keymap-layout-tools/lib/modifiers.js'
 
 import { Dialog, DialogHeading, DialogNote } from '../Common/Dialog.jsx'
-import Layout from '../Common/Layout.jsx'
 import Modal from '../Common/Modal.jsx'
 import { ReorderContext } from './Context.js'
 
-import {
-  DragSelectContainer,
-  DragSelectStyleSwitcher,
-  DRAG_MODE_REMOVE,
-  useDragSelector
-} from '../Common/DragSelector/DragSelector.jsx'
+import DragSelectStyleSwitcher from '../Common/DragSelector/DragStyleSwitcher.jsx'
 import { ColMarker, RowMarker } from './Markers.jsx'
 import { useReorderStore } from './store.js'
 import styles from './reorder.module.css'
 import SelectableKey from './SelectableKey.jsx'
+import { SelectableLayout, useSelectableLayoutProps } from '../Common/SelectableLayout.jsx'
 
 const scale = 0.6
 
@@ -32,6 +27,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
   const [state, actions] = useReorderStore(layout)
   const [previewSelection, setPreviewSelection] = useState(null)
   const { selectionMode, selection } = state
+  const group = state[state.selectionMode][state.selection] || []
 
   const keyPolygons = useMemo(() => (
     layout.map(key => transformKeyPolygon(
@@ -62,13 +58,12 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     return () => document.body.removeEventListener('keydown', handleKey)
   }, [actions])
 
-  const handleDragSelect = useCallback(({ mode, intersections }) => {
-    mode === DRAG_MODE_REMOVE
-      ? actions.removeFromSelected(intersections)
-      : actions.addToSelected(intersections)
+  const handleDragSelect = useCallback(selection => {
+    actions.updateSelection(selection, 'replace')
   }, [actions])
 
-  const dragProps = useDragSelector(keyPolygons, handleDragSelect)
+  const selectableLayoutProps = useSelectableLayoutProps(layout, scale, group, handleDragSelect)
+  const { dragProps: { style: dragSelectStyle, setStyle: setDragSelectStyle } } = selectableLayoutProps
 
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
   const colMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.columns, 'x'), [keyCenters, state.columns])
@@ -118,24 +113,29 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
             ))}
 
             <ReorderContext.Provider value={{ state, actions, previewSelection, keyAssignments }}>
-              <DragSelectContainer {...dragProps}>
-                <Layout
-                  layout={layout}
-                  scale={scale}
-                  renderKey={props => (
+              <SelectableLayout
+                {...selectableLayoutProps}
+                layoutProps={{
+                  ...selectableLayoutProps.layoutProps,
+                  renderKey: props => (
                     <SelectableKey {...props} />
-                  )}
-                />
-              </DragSelectContainer>
+                  )
+                }}
+              />
             </ReorderContext.Provider>
           </div>
 
-          <DragSelectStyleSwitcher {...dragProps} />
+          <DragSelectStyleSwitcher
+            style={dragSelectStyle}
+            onChangeStyle={setDragSelectStyle}
+          />
 
           <DialogNote>
             Click on individual keys to add/remove them from the selected row or
-            column. Click and drag a region to add (or hold shift to remove) all
-            intersecting keys to the selected row/column.
+            column.
+            <br/>
+            Click and drag to select a region (with <kbd>Shift</kbd> to add or
+            with <kbd>Alt</kbd> to remove from the current selection).
           </DialogNote>
         </div>
 
