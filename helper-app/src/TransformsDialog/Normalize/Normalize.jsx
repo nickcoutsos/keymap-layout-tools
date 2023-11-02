@@ -42,7 +42,7 @@ export default function Normalize ({ layout, onUpdate }) {
     return (
       <>
         <Layout
-          layout={combined}
+          layout={layout}
           normalize={false}
           scale={SCALE}
           overrides={{ margin: '0 auto' }}
@@ -68,12 +68,11 @@ export default function Normalize ({ layout, onUpdate }) {
         margin: '30px 0 10px'
       }}>
         <Layout
-          layout={layout}
+          layout={combined}
           scale={SCALE}
           overrides={{ margin: '0 auto' }}
           renderKey={({ keyLayout, index }) => (
             <Key
-              index=""
               keyLayout={keyLayout}
               className={classNames({
                 [styles.original]: index >= layout.length,

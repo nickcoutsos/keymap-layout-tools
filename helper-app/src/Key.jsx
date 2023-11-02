@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './key-styles.module.css'
 
-function Key ({ index, keyLayout, className = '', ...props }) {
+function Key ({ index, keyLayout, className = '', children, ...props }) {
   const classes = classNames(
     styles.key,
     className
@@ -12,13 +12,13 @@ function Key ({ index, keyLayout, className = '', ...props }) {
 
   return (
     <div className={classes} {...props}>
-      {index}
+      {children ?? index}
     </div>
   )
 }
 
 Key.propTypes = {
-  index: PropTypes.any.isRequired,
+  index: PropTypes.any,
   keyLayout: keyboardLayoutPropTypes.keyLayout,
   className: PropTypes.string
 }

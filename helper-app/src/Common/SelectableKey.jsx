@@ -1,8 +1,8 @@
 import classNames from 'classnames'
 
-import keyStyles from '../Reorder/key.module.css'
-import Key from '../Key.jsx'
 import { useSelectionContext } from './SelectableLayout.jsx'
+import keyStyles from '../key-styles.module.css'
+import Key from '../Key.jsx'
 
 export default function SelectableKey (props) {
   const { index } = props
@@ -20,6 +20,8 @@ export default function SelectableKey (props) {
         [keyStyles.preview]: previewDragSelect,
         [keyStyles.previewDeselect]: previewDeselect
       })}
-    />
+    >
+      {props.children}
+    </Key>
   )
 }

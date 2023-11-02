@@ -42,11 +42,12 @@ export default function Mirror ({ layout, onUpdate }) {
 function renderSwitch ({ keyLayout, index }) {
   return (
     <Key
-      index={index}
       keyLayout={keyLayout}
       className={classNames({
         [keyStyles.ghost]: keyLayout._duplicate
       })}
-    />
+    >
+      {index}
+    </Key>
   )
 }
