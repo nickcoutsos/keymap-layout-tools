@@ -1,6 +1,7 @@
 .error {
+  flex: 1 0 auto;
   color: tomato;
   font-size: 80%;
-  max-height: 5em;
+  max-height: 10em;
   overflow: auto;
 }
