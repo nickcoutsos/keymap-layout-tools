@@ -14,9 +14,9 @@
 
 .axis {
   --length: 100px;
-  --thickness: 8px;
-  --half-thickness: 4px;
-  --offset: -4px, -4px;
+  --thickness: 16px;
+  --half-thickness: 8px;
+  --offset: -8px, -8px;
 
   position: absolute;
   top: 0;

@@ -52,14 +52,14 @@ const metadataSlice = createSlice({
       state.keySelection = []
     },
     metadataUpdated (state, action) {
-      const { text, parsed } = action.payload
+      const { text, parsed, keepSelection } = action.payload
       const normalized = normalize(parsed)
       const defaultLayout = Object.keys(normalized.layouts)[0]
 
       state.errors = []
       state.parsed = parsed
       state.text = text
-      state.keySelection = []
+      state.keySelection = keepSelection ? state.keySelection : []
       state.selectedLayout = (
         state.selectedLayout in normalized.layouts
           ? state.selectedLayout
@@ -90,7 +90,7 @@ export const {
 
 export const updateMetadata = createAsyncThunk(
   'metadata/update',
-  async ({ text, layout, metadata }, { dispatch, getState }) => {
+  async ({ text, layout, metadata, keepSelection = false }, { dispatch, getState }) => {
     let parsed
     if (text) {
       try {
@@ -123,7 +123,7 @@ export const updateMetadata = createAsyncThunk(
       text = formatMetadata(parsed)
     }
 
-    dispatch(metadataUpdated({ parsed, text }))
+    dispatch(metadataUpdated({ parsed, text, keepSelection }))
   }
 )
 

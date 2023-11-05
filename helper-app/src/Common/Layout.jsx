@@ -20,6 +20,11 @@ export default function Layout ({ layout: original, scale, normalize, overrides,
     layout && getWrapperStyle(layout, { scale, overrides })
   ), [layout, scale, overrides])
 
+  // TODO: Passing layout (normalized) and original into `renderOverlay()` is
+  // sloppy but I can't deal with it right now. The `layout` param is necessary
+  // to render overlays on a potentially-normalized layout rendering and the
+  // `original` param is necessary when computing something with layout data.
+
   return (
     <div style={wrapperStyle}>
       <div style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}>
@@ -28,7 +33,7 @@ export default function Layout ({ layout: original, scale, normalize, overrides,
             {renderKey({ index, keyLayout })}
           </KeyPlacer>
         ))}
-        {renderOverlay(layout)}
+        {renderOverlay(layout, original)}
       </div>
     </div>
   )

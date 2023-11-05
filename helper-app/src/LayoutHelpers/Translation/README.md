@@ -8,9 +8,16 @@ the same row or column stagger to a number of keys one at a time.
 
 ## What works
 
-Right now you can select one or more keys and use the gizmo to start translating
-them. While dragging you can see a live visualization of the keys in their new
-positions, and on release the mouse button the layout itself will be updated.
+Right now you can select one or more keys, hit <kbd>m</kbd> and use the gizmo to
+start translating key positions. While dragging you can see a live visualization
+of the keys in their new positions, and on release the mouse button the layout
+itself will be updated.
+
+You can move keys on one axis at a time and the offset is constrained to `0.25u`
+increments.
+
+Translations apply to both the `x`/`y` and `rx`/`ry` properties (if present), so
+they're effectively independent of rotations.
 
 ## What needs work
 
@@ -28,9 +35,11 @@ review the problem more carefully.
 
 ### Local vs global?
 
-Because translation currently affects only the `x` and `y` properties, weird
+~~Because translation currently affects only the `x` and `y` properties, weird
 things will happen to keys that also have rotations. I need to decide if and how
-to handle such a situation.
+to handle such a situation.~~ Translations now apply to the rotation origin,
+because it seems like the least disruptive while the user can't make the choice
+for themselves, but this isn't a permanent decision.
 
 - Should the rotation origin be shifted as well?
 - Should the user be able to switch between contexts and choose either behavior?
@@ -60,6 +69,7 @@ This could be as simple as holding some combination of <kbd>shift</kbd>,
 <kbd>control</kbd>, or <kbd>alt</kbd> keys maybe.
 
 ### Don't apply translation to layout immediately?
+
 - Add numeric input fields and allow user to enter precise offset(s)
 - Let user decide local or global
 
@@ -69,3 +79,13 @@ I have a `GridHelper` overlay component (not committed yet) that shows a grid
 of lines spaced 1u apart. Should the grid be aligned to the canvas origin, to
 the corner of the selection, or to the center? I think without the correct frame
 of reference the grid may not be that helpful.
+
+### Show overlapping keys
+
+I'm also working on an overlay that will highlight keys which overlap eachother.
+It works well for keyboards without rotation, but in other cases the imprecision
+of coordinates can cause polygons to appear to intersect mathematically even if
+the graphical representation doesn't show it.
+
+I'll need to refine it so that there's a threshold below which the intersection
+can be ignored.

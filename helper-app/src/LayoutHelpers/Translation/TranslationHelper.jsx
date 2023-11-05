@@ -1,4 +1,6 @@
-import { useCallback, useState } from 'react'
+import cloneDeep from 'lodash/cloneDeep.js'
+import classNames from 'classnames'
+import { useCallback, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
 import {
@@ -11,10 +13,15 @@ import Axes from './Axes.jsx'
 import KeyPlacer from '../../KeyPlacer.jsx'
 import Key from '../../Key.jsx'
 import { updateMetadata } from '../../metadataSlice.js'
+import keyStyles from '../../key-styles.module.css'
 
-function TranslationHelper ({ layout, scale, keyIndices }) {
-  const [dragOffset, setDragOffset] = useState([0, 0])
+function TranslationHelper ({ layout, original, scale, keyIndices }) {
   const dispatch = useDispatch()
+  const [dragOffset, setDragOffset] = useState(null)
+  const step = 0.25
+  const snappedOffset = useMemo(() => dragOffset && (
+    dragOffset.map(v => Math.round(v / scale / 70 / step) * step)
+  ), [step, scale, dragOffset])
 
   const keys = keyIndices.map(i => layout[i])
   const bbox = keys.map(key => (
@@ -26,45 +33,28 @@ function TranslationHelper ({ layout, scale, keyIndices }) {
     y: (bbox.max.y + bbox.min.y) / 2
   }
 
-  const offset = [
-    dragOffset[0] / scale / 70,
-    dragOffset[1] / scale / 70
-  ]
-
   const handleDragComplete = useCallback(offset => {
-    dispatch(updateMetadata({
-      layout: layout.map((keyLayout, i) => {
-        const withOffset = {
-          ...keyLayout,
-          x: keyLayout.x + offset[0] / scale / 70,
-          y: keyLayout.y + offset[1] / scale / 70
-        }
+    offset = offset.map(v => Math.round(v / scale / 70 / step) * step)
 
-        return keyIndices.includes(i)
-          ? withOffset
+    dispatch(updateMetadata({
+      keepSelection: true,
+      layout: original.map((keyLayout, i) => (
+        keyIndices.includes(i)
+          ? getTranslatedKey(keyLayout, offset)
           : keyLayout
-      })
+      ))
     }))
 
-    setDragOffset([0, 0])
-  }, [layout, scale, keyIndices, setDragOffset, dispatch])
+    setDragOffset(null)
+  }, [original, step, scale, keyIndices, setDragOffset, dispatch])
 
   return (
     <>
-      {keys.map((key, i) => (
-        // Not the best way to do this but it works ok for now
-        <KeyPlacer key={i} keyLayout={{
-          ...key,
-          x: key.x + offset[0],
-          y: key.y + offset[1]
-        }}>
-          <Key index="?" style={{ border: '2px solid royalblue' }} />
-        </KeyPlacer>
-      ))}
+      <TranslatingKeys offset={snappedOffset} scale={scale} keys={keys} />
       <div style={{
         position: 'absolute',
-        left: `${center.x + dragOffset[0] / scale}px`,
-        top: `${center.y + dragOffset[1] / scale}px`
+        left: `${center.x + (dragOffset?.[0] || 0) / scale}px`,
+        top: `${center.y + (dragOffset?.[1] || 0) / scale}px`
       }}>
         <Axes
           onDragging={setDragOffset}
@@ -73,6 +63,35 @@ function TranslationHelper ({ layout, scale, keyIndices }) {
       </div>
     </>
   )
+}
+
+function TranslatingKeys ({ keys, offset }) {
+  if (offset === null) {
+    return null
+  }
+
+  return (
+    <>
+      {keys.map((key, i) => (
+        // Not the best way to do this but it works ok for now
+        <KeyPlacer key={i} keyLayout={getTranslatedKey(key, offset)}>
+          <Key className={classNames(
+            keyStyles.selected,
+            keyStyles.ghost
+          )} />
+        </KeyPlacer>
+      ))}
+    </>
+  )
+}
+
+function getTranslatedKey (key, offset) {
+  const transformed = cloneDeep(key)
+  transformed.x += offset[0]
+  transformed.y += offset[1]
+  if ('rx' in transformed) transformed.rx += offset[0]
+  if ('ry' in transformed) transformed.ry += offset[1]
+  return transformed
 }
 
 function withEmptyGuard (Component) {
