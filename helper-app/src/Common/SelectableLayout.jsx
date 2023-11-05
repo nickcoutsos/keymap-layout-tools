@@ -34,7 +34,7 @@ export function SelectableLayout ({ dragProps, selectionContextProps, layoutProp
 }
 
 export default function ConnectedSelectableLayout ({ layout, selection, onUpdate, onHover, scale = DEFAULT_SCALE, ...rest }) {
-  const props = useSelectableLayoutProps(layout, scale, selection, onUpdate, onHover)
+  const props = useSelectableLayoutProps(layout, scale, selection, onUpdate, onHover, SelectableKey)
 
   return (
     <SelectableLayout
@@ -47,7 +47,7 @@ export default function ConnectedSelectableLayout ({ layout, selection, onUpdate
   )
 }
 
-export function useSelectableLayoutProps (layout, scale, selection, onUpdate, onHover) {
+export function useSelectableLayoutProps (layout, scale, selection, onUpdate, onHover, SelectableKeyComponent) {
   const keyPolygons = useMemo(() => (
     layout.map(key => transformKeyPolygon(
       { x: key.x, y: key.y },
@@ -95,7 +95,7 @@ export function useSelectableLayoutProps (layout, scale, selection, onUpdate, on
     layout,
     scale,
     renderKey: ({ index, keyLayout }) => (
-      <SelectableKey
+      <SelectableKeyComponent
         index={index}
         keyLayout={keyLayout}
         onClick={event => handleClickSelect(event, index)}
@@ -103,7 +103,7 @@ export function useSelectableLayoutProps (layout, scale, selection, onUpdate, on
         onMouseLeave={() => onHover(null)}
       >
         {index}
-      </SelectableKey>
+      </SelectableKeyComponent>
     )
   }), [layout, scale, handleClickSelect, onHover])
 

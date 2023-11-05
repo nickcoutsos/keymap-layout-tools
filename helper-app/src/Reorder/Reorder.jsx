@@ -62,7 +62,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
     actions.updateSelection(selection, 'replace')
   }, [actions])
 
-  const selectableLayoutProps = useSelectableLayoutProps(layout, scale, group, handleDragSelect)
+  const selectableLayoutProps = useSelectableLayoutProps(layout, scale, group, handleDragSelect, () => {}, SelectableKey)
   const { dragProps: { style: dragSelectStyle, setStyle: setDragSelectStyle } } = selectableLayoutProps
 
   const rowMarkerPositions = useMemo(() => getMarkerPositions(keyCenters, state.rows, 'y'), [keyCenters, state.rows])
@@ -113,15 +113,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
             ))}
 
             <ReorderContext.Provider value={{ state, actions, previewSelection, keyAssignments }}>
-              <SelectableLayout
-                {...selectableLayoutProps}
-                layoutProps={{
-                  ...selectableLayoutProps.layoutProps,
-                  renderKey: props => (
-                    <SelectableKey {...props} />
-                  )
-                }}
-              />
+              <SelectableLayout {...selectableLayoutProps} />
             </ReorderContext.Provider>
           </div>
 
@@ -131,8 +123,7 @@ export default function Reorder ({ layout: originalLayout, onUpdate, onCancel })
           />
 
           <DialogNote>
-            Click on individual keys to add/remove them from the selected row or
-            column.
+            Select keys to be included in the active the active row or column.
             <br/>
             Click and drag to select a region (with <kbd>Shift</kbd> to add or
             with <kbd>Alt</kbd> to remove from the current selection).
