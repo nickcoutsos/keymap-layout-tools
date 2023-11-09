@@ -1,7 +1,6 @@
-import cloneDeep from 'lodash/cloneDeep.js'
 import classNames from 'classnames'
+import cloneDeep from 'lodash/cloneDeep.js'
 import { useCallback, useMemo, useState } from 'react'
-import { useDispatch } from 'react-redux'
 
 import {
   bboxUnion,
@@ -12,13 +11,10 @@ import {
 import Axes from './Axes.jsx'
 import KeyPlacer from '../../KeyPlacer.jsx'
 import Key from '../../Key.jsx'
-import { updateMetadata } from '../../metadataSlice.js'
 import keyStyles from '../../key-styles.module.css'
 
-function TranslationHelper ({ layout, original, scale, keyIndices }) {
-  const dispatch = useDispatch()
+function TranslationHelper ({ layout, original, scale, keyIndices, onUpdate, step = 0.25 }) {
   const [dragOffset, setDragOffset] = useState(null)
-  const step = 0.25
   const snappedOffset = useMemo(() => dragOffset && (
     dragOffset.map(v => Math.round(v / scale / 70 / step) * step)
   ), [step, scale, dragOffset])
@@ -36,17 +32,16 @@ function TranslationHelper ({ layout, original, scale, keyIndices }) {
   const handleDragComplete = useCallback(offset => {
     offset = offset.map(v => Math.round(v / scale / 70 / step) * step)
 
-    dispatch(updateMetadata({
-      keepSelection: true,
-      layout: original.map((keyLayout, i) => (
+    onUpdate(
+      original.map((keyLayout, i) => (
         keyIndices.includes(i)
           ? getTranslatedKey(keyLayout, offset)
           : keyLayout
       ))
-    }))
+    )
 
     setDragOffset(null)
-  }, [original, step, scale, keyIndices, setDragOffset, dispatch])
+  }, [original, step, scale, keyIndices, setDragOffset, onUpdate])
 
   return (
     <>

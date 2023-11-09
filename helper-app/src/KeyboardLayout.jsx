@@ -8,7 +8,8 @@ import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
 import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import {
   updateKeySelection,
-  selectKeySelection
+  selectKeySelection,
+  updateMetadata
 } from './metadataSlice.js'
 import SelectableLayout from './Common/SelectableLayout.jsx'
 import TranslationHelper from './LayoutHelpers/Translation/TranslationHelper.jsx'
@@ -67,6 +68,10 @@ function KeyboardLayout (props) {
     dispatch(updateKeySelection({ keys }))
   }, [dispatch])
 
+  const handleTranslation = useCallback(layout => {
+    dispatch(updateMetadata({ layout, keepSelection: true }))
+  }, [dispatch])
+
   return (
     <>
       <SelectableLayout
@@ -91,6 +96,7 @@ function KeyboardLayout (props) {
                 original={original}
                 scale={scale}
                 keyIndices={selectedKeys}
+                onUpdate={handleTranslation}
               />
             )}
           </>
