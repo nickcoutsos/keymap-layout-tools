@@ -12,7 +12,8 @@ const initialState = {
 
   // TODO: Move these into a different state slice
   keySelection: [],
-  selectedLayout: null
+  selectedLayout: null,
+  activeTool: null
 }
 
 export const selectMetadata = state => state.metadata
@@ -42,6 +43,8 @@ export const selectLayoutNames = state => (
 )
 
 export const selectKeySelection = state => state.metadata.keySelection
+
+export const selectActiveTool = state => state.metadata.activeTool
 
 const metadataSlice = createSlice({
   name: 'metadata',
@@ -77,6 +80,10 @@ const metadataSlice = createSlice({
           ? [...state.keySelection, ...keys]
           : [...keys]
       )
+    },
+    toolChange (state, action) {
+      const { tool } = action.payload
+      state.activeTool = state.activeTool === tool ? null : tool
     }
   }
 })
@@ -85,7 +92,8 @@ export const {
   changeSelectedLayout,
   metadataUpdated,
   metadataInvalid,
-  updateKeySelection
+  updateKeySelection,
+  toolChange
 } = metadataSlice.actions
 
 export const updateMetadata = createAsyncThunk(

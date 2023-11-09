@@ -10,11 +10,12 @@ import Key from './Key.jsx'
 import corneLayout from './corne-layout.json'
 
 import styles from './styles.module.css'
-import { selectLayout, updateMetadata } from './metadataSlice'
+import { selectLayout, toolChange, updateMetadata } from './metadataSlice'
 
 function App () {
   const layout = useSelector(selectLayout)
   const [scale, setScale] = useState(0.7)
+  useToolShortcuts()
 
   const zoom = (
     <input
@@ -65,6 +66,29 @@ function App () {
       </div>
     </>
   )
+}
+
+function useToolShortcuts () {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    function listener (event) {
+      if (
+        event.repeat ||
+        ['SELECT', 'TEXTAREA', 'INPUT'].includes(event.target.nodeName) ||
+        event.target.contentEditable === 'true'
+      ) {
+        return
+      }
+
+      if (event.key === 'm') {
+        dispatch(toolChange({ tool: 'translation' }))
+      }
+    }
+
+    document.addEventListener('keydown', listener)
+    return () => document.removeEventListener('keydown', listener)
+  }, [dispatch])
 }
 
 function withInitializedState (Component) {
