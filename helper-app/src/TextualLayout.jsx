@@ -1,15 +1,59 @@
-import { useMemo } from 'react'
-import renderLayout from 'keymap-layout-tools/lib/render'
+import { useCallback, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-export default function TextualLayout ({ layout }) {
-  const labels = useMemo(() => layout.map((_, i) => i.toString()), [layout])
+import SelectableLayout from './Common/SelectableLayout.jsx'
+import TranslationHelper from './LayoutHelpers/Translation/TranslationHelper.jsx'
+import {
+  selectActiveTool,
+  selectKeySelection,
+  updateKeySelection,
+  updateMetadata
+} from './metadataSlice.js'
+
+export default function TextualLayout ({ layout: original }) {
+  const dispatch = useDispatch()
+  const selectedKeys = useSelector(selectKeySelection)
+  const layout = useMemo(() => {
+    return original.map(({ row, col }) => ({
+      x: col,
+      y: row
+    }))
+  }, [original])
+
+  const activeTool = useSelector(selectActiveTool)
+
+  const handleTranslation = useCallback(layout => {
+    dispatch(updateMetadata({
+      keepSelection: true,
+      layout: original.map((layoutKey, i) => (
+        selectedKeys.includes(i)
+          ? { ...layoutKey, row: layout[i].y, col: layout[i].x }
+          : layoutKey
+      ))
+    }))
+  }, [dispatch, original, selectedKeys])
+
   return (
-    <pre style={{ maxHeight: '15em', overflow: 'auto' }}>
-      {(
-        layout.every(key => 'row' in key && 'col' in key)
-          ? renderLayout(layout, labels)
-          : ' -- Missing `row`/`col` attributes from layout --'
+    <SelectableLayout
+      layout={layout}
+      scale={0.5}
+      selection={selectedKeys}
+      onUpdate={keys => dispatch(updateKeySelection({ keys }))}
+      onHover={() => {}}
+      renderOverlay={(layout, original) => (
+        <>
+          {activeTool === 'translation' && (
+            <TranslationHelper
+              layout={layout}
+              original={original}
+              scale={0.5}
+              step={1}
+              keyIndices={selectedKeys}
+              onUpdate={handleTranslation}
+            />
+          )}
+        </>
       )}
-    </pre>
+    />
   )
 }
