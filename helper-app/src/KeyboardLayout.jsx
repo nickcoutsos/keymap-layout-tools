@@ -1,11 +1,9 @@
 import isEqual from 'lodash/isEqual'
 import pick from 'lodash/pick'
 import PropTypes from 'prop-types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
-import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import {
   updateKeySelection,
   selectKeySelection,
@@ -13,7 +11,10 @@ import {
   selectActiveTool
 } from './metadataSlice.js'
 import SelectableLayout from './Common/SelectableLayout.jsx'
+import RotationOriginHelper from './LayoutHelpers/RotationOriginHelper.js'
+import OverlapsOverlay from './LayoutHelpers/Overlaps/OverlapsOverlay.jsx'
 import TranslationHelper from './LayoutHelpers/Translation/TranslationHelper.jsx'
+import * as keyboardLayoutPropTypes from './keyboardLayoutPropTypes'
 import styles from './styles.module.css'
 
 function matchRotations (keyA, keyB) {
@@ -75,6 +76,8 @@ function KeyboardLayout (props) {
                 onUpdate={handleTranslation}
               />
             )}
+
+            <OverlapsOverlay layout={layout} />
           </>
         )}
       />
