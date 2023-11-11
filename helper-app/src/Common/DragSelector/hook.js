@@ -73,6 +73,11 @@ export function useDragSelector (polygons, onSelect) {
     const rect = offsetElement.getBoundingClientRect()
     const { clientX: x, clientY: y } = event
 
+    const focussedElement = document.querySelector(':focus')
+    if (focussedElement) {
+      focussedElement.blur()
+    }
+
     event.preventDefault()
     beginDrag([x, y], rect)
   }, [beginDrag])

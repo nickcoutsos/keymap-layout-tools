@@ -18,8 +18,13 @@
 
 .code {
   display: flex;
-  padding: 0 15px 15px 15px;
+  margin: 0 15px 15px 15px;
   flex-direction: column;
+  border-radius: 4px;
+}
+
+.code:focus-within {
+  outline: 2px solid royalblue;
 }
 
 .zoom {
