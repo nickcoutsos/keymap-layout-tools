@@ -2,8 +2,9 @@ import cloneDeep from 'lodash/cloneDeep.js'
 import uniq from 'lodash/uniq.js'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
+import { formatMetadata } from 'keymap-layout-tools/lib/metadata'
 import { InfoValidationError, validateInfoJson } from 'keymap-layout-tools/lib/validate'
-import { formatMetadata, isRawLayout, normalize } from './Code/util'
+import { isRawLayout, normalize } from './Code/util'
 
 const initialState = {
   text: '',

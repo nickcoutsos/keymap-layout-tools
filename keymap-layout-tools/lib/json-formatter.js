@@ -52,13 +52,17 @@ export function formatJson (obj, replacers, space) {
  * case that an object is missing a column present in other rows whitespace will
  * be rendered in its place.
  * @param {Array<Object>} rows
+ * @param {Array<String>} [preferredKeyOrder=[]]
  * @returns {Array<String>}
  */
-export function jsonTable (rows) {
+export function jsonTable (rows, preferredKeyOrder = []) {
   // Values must be stringified so that additional characters like quotation
   // marks wrapping or within strings are factored into column widths.
   rows = rows.map(row => (
-    Object.keys(row).reduce((acc, key) => ({
+    inPreferredOrder(
+      Object.keys(row),
+      preferredKeyOrder
+    ).reduce((acc, key) => ({
       ...acc, [key]: JSON.stringify(row[key])
     }), {})
   ))
@@ -96,6 +100,13 @@ export function jsonTable (rows) {
 
     return `  { ${columns.join(', ')} }`
   })
+}
+
+function inPreferredOrder (keys, preferredOrder) {
+  return [
+    ...preferredOrder.filter(key => keys.includes(key)),
+    ...keys.filter(v => !preferredOrder.includes(v))
+  ]
 }
 
 /**
