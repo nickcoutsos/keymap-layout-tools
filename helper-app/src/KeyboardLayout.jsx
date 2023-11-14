@@ -59,6 +59,8 @@ function KeyboardLayout (props) {
         onHover={setHovering}
         renderOverlay={(layout, original) => (
           <>
+            <OverlapsOverlay layout={layout} />
+
             {rotating && rotating.map(({ index }) => (
               <RotationOriginHelper
                 key={index}
@@ -76,8 +78,6 @@ function KeyboardLayout (props) {
                 onUpdate={handleTranslation}
               />
             )}
-
-            <OverlapsOverlay layout={layout} />
           </>
         )}
       />
