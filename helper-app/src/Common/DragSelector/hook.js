@@ -69,6 +69,10 @@ export function useDragSelector (polygons, onSelect) {
   ), [setStyle])
 
   const handleMouseDown = useCallback(event => {
+    if (['SELECT', 'TEXTAREA', 'INPUT'].includes(event.target.nodeName)) {
+      return
+    }
+
     const offsetElement = getRelativeAncestor(event.target)
     const rect = offsetElement.getBoundingClientRect()
     const { clientX: x, clientY: y } = event
