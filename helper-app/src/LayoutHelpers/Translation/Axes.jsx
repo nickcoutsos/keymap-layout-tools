@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import compact from 'lodash/compact'
 import { useCallback, useEffect, useState } from 'react'
 
 import styles from './styles.module.css'
@@ -14,18 +14,10 @@ export default function Axes ({ onDragging, onDragComplete }) {
     function getEventDelta (event) {
       event.preventDefault()
       event.stopPropagation()
-      const delta = [
-        event.clientX - dragState.start[0],
-        event.clientY - dragState.start[1]
+      return [
+        event.movementX * (dragState.axes.includes('x') ? 1 : 0),
+        event.movementY * (dragState.axes.includes('y') ? 1 : 0)
       ]
-
-      if (dragState.axis === 'x') {
-        delta[1] = 0
-      } else {
-        delta[0] = 0
-      }
-
-      return delta
     }
 
     function handleDrag (event) {
@@ -50,16 +42,19 @@ export default function Axes ({ onDragging, onDragComplete }) {
     event.preventDefault()
 
     setDragState({
-      axis: event.target.dataset.axis,
+      axes: compact([
+        event.target.dataset.axisX && 'x',
+        event.target.dataset.axisY && 'y'
+      ]),
       start: [event.clientX, event.clientY]
     })
   }, [setDragState])
 
   return (
     <div className={styles.axesContainer}>
-      <div onMouseDown={startDrag} data-axis="x" className={classNames(styles.axis)} />
-      <div onMouseDown={startDrag} data-axis="y" className={classNames(styles.axis)} />
-      <div className={styles.origin} />
+      <div onMouseDown={startDrag} data-axis-x className={styles.handle} />
+      <div onMouseDown={startDrag} data-axis-y className={styles.handle} />
+      <div onMouseDown={startDrag} data-axis-x data-axis-y className={styles.origin} />
     </div>
   )
 }

@@ -9,15 +9,18 @@ import {
 } from 'keymap-layout-tools/lib/geometry.js'
 
 import Axes from './Axes.jsx'
+import Offset from './Offset.jsx'
 import KeyPlacer from '../../KeyPlacer.jsx'
 import Key from '../../Key.jsx'
 import keyStyles from '../../key-styles.module.css'
 
-function TranslationHelper ({ layout, original, scale, keyIndices, onUpdate, step = 0.25 }) {
-  const [dragOffset, setDragOffset] = useState(null)
-  const snappedOffset = useMemo(() => dragOffset && (
-    dragOffset.map(v => Math.round(v / scale / 70 / step) * step)
-  ), [step, scale, dragOffset])
+const PX_TO_KEY_UNIT = 1 / 70
+
+function TranslationHelper ({ layout, original, scale, keyIndices, onUpdate, step = 0.25, applyImmediately = true }) {
+  const [offset, setOffset] = useState([0, 0])
+  const snappedOffset = useMemo(() => (
+    offset.map(v => Math.round(v / step) * step)
+  ), [step, offset])
 
   const keys = keyIndices.map(i => layout[i])
   const bbox = keys.map(key => (
@@ -29,31 +32,51 @@ function TranslationHelper ({ layout, original, scale, keyIndices, onUpdate, ste
     y: (bbox.max.y + bbox.min.y) / 2
   }
 
-  const handleDragComplete = useCallback(offset => {
-    offset = offset.map(v => Math.round(v / scale / 70 / step) * step)
+  const pixelToKeyUnit = useCallback(v => v * PX_TO_KEY_UNIT / scale, [scale])
 
-    onUpdate(
-      original.map((keyLayout, i) => (
-        keyIndices.includes(i)
-          ? getTranslatedKey(keyLayout, offset)
-          : keyLayout
-      ))
-    )
+  const handleUpdatePixelOffset = useCallback(offset => {
+    const [offsetX, offsetY] = offset.map(pixelToKeyUnit)
+    setOffset(([x, y]) => ([
+      x + offsetX,
+      y + offsetY
+    ]))
+  }, [setOffset, pixelToKeyUnit])
 
-    setDragOffset(null)
-  }, [original, step, scale, keyIndices, setDragOffset, onUpdate])
+  function handleDragComplete () {
+    if (applyImmediately) {
+      onUpdate(
+        original.map((keyLayout, i) => (
+          keyIndices.includes(i)
+            ? getTranslatedKey(keyLayout, snappedOffset)
+            : keyLayout
+        ))
+      )
+
+      setOffset([0, 0])
+    }
+  }
 
   return (
     <>
-      <TranslatingKeys offset={snappedOffset} scale={scale} keys={keys} />
+      <TranslatingKeys
+        offset={snappedOffset}
+        keys={keys}
+      />
+
       <div style={{
         position: 'absolute',
-        left: `${center.x + (dragOffset?.[0] || 0) / scale}px`,
-        top: `${center.y + (dragOffset?.[1] || 0) / scale}px`
+        left: `${center.x + offset[0] / PX_TO_KEY_UNIT}px`,
+        top: `${center.y + offset[1] / PX_TO_KEY_UNIT}px`
       }}>
         <Axes
-          onDragging={setDragOffset}
+          offset={offset}
+          onDragging={handleUpdatePixelOffset}
           onDragComplete={handleDragComplete}
+        />
+
+        <Offset
+          value={snappedOffset}
+          onUpdate={setOffset}
         />
       </div>
     </>
@@ -66,7 +89,7 @@ function TranslatingKeys ({ keys, offset }) {
   }
 
   return (
-    <>
+    <div style={{ pointerEvents: 'none' }}>
       {keys.map((key, i) => (
         // Not the best way to do this but it works ok for now
         <KeyPlacer key={i} keyLayout={getTranslatedKey(key, offset)}>
@@ -76,7 +99,7 @@ function TranslatingKeys ({ keys, offset }) {
           )} />
         </KeyPlacer>
       ))}
-    </>
+    </div>
   )
 }
 

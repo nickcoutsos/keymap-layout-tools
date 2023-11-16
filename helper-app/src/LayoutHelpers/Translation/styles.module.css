@@ -3,16 +3,21 @@
 }
 
 .origin {
+  cursor: grab;
   position: absolute;
-  left: -6px;
-  top: -6px;
-  width: 12px;
-  height: 12px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
   background-color: var(--fg);
 }
+.origin:hover {
+  border: 2px solid royalblue;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%) scale(150%);
+}
 
-.axis {
+.handle {
   --length: 100px;
   --thickness: 16px;
   --half-thickness: 8px;
@@ -31,13 +36,13 @@
   opacity: 0.6;
 }
 
-.axis:hover {
+.handle:hover {
   cursor: grab;
   opacity: 1;
 }
 
-.axis[data-axis="x"] { background-color: red }
-.axis[data-axis="y"] {
+.handle[data-axis-x] { background-color: red }
+.handle[data-axis-y] {
   background-color: mediumseagreen;
   transform: rotate(90deg) translate(var(--offset));
 }
