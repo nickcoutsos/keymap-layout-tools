@@ -50,14 +50,15 @@ export function flip (layout, { referenceOriginal = false } = {}) {
     ...layout,
     ...row.map((key, i) => {
       const newKey = { ...key }
-      newKey.x = maxX - key.x - ((key.w || 1) - 1)
+      const width = key.w || 1
+      newKey.x = maxX - key.x - (width - 1)
       newKey.col = maxCol - key.col
 
       if ('r' in key) {
         newKey.r = -key.r
       }
       if ('rx' in key) {
-        newKey.rx = newKey.x + (key.x - key.rx) * -1
+        newKey.rx = maxX - key.rx + width
       }
 
       if (referenceOriginal) {
