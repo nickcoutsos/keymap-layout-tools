@@ -75,7 +75,7 @@ export default function ParseOptions ({ options, onChange }) {
             defaultValue={DEFAULT_MODULE_PATTERN}
             onUpdate={updateOption}
           />
-        )}
+        )} <Error value={getRegexError(options.modulePattern)} />
       </div>
       <div>
         <label>
@@ -83,6 +83,7 @@ export default function ParseOptions ({ options, onChange }) {
             name="switchPattern"
             type="text"
             value={options.switchPattern}
+            error={getRegexError(options.switchPattern)}
             onChange={handleChange}
           />
         </label> {options.switchPattern !== DEFAULT_SWITCH_PATTERN && (
@@ -91,10 +92,18 @@ export default function ParseOptions ({ options, onChange }) {
             defaultValue={DEFAULT_SWITCH_PATTERN}
             onUpdate={updateOption}
           />
-        )}
+        )} <Error value={getRegexError(options.switchPattern)} />
       </div>
     </>
   )
+}
+
+function getRegexError (value) {
+  try {
+    return new RegExp(value) && false
+  } catch (err) {
+    return err
+  }
 }
 
 function RevertToDefaultButton ({ name, defaultValue, onUpdate }) {
@@ -107,5 +116,23 @@ function RevertToDefaultButton ({ name, defaultValue, onUpdate }) {
     <button title={title} onClick={handleClick}>
       ⎌ Revert
     </button>
+  )
+}
+
+function Error ({ value }) {
+  if (!value) {
+    return null
+  }
+
+  return (
+    <span style={{
+      backgroundColor: 'rgba(255, 0, 0, 0.2)',
+      border: '2px solid crimson',
+      borderRadius: '4px',
+      color: 'crimson',
+      padding: '2px'
+    }}>
+      Syntax error: {value.message || value.toString()}
+    </span>
   )
 }

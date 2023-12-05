@@ -20,12 +20,24 @@ export function useKicadImporter (contents, options) {
     contents && parsePcbTree(contents)
   ), [contents])
 
-  const switches = useMemo(() => (
-    tree && getSwitches(tree, {
-      modulePattern: options.modulePattern,
-      switchPattern: options.switchPattern
+  const switches = useMemo(() => {
+    if (!tree) {
+      return null
+    }
+    let modulePattern
+    let switchPattern
+    try {
+      modulePattern = new RegExp(options.modulePattern)
+    } catch {}
+    try {
+      switchPattern = new RegExp(options.switchPattern)
+    } catch {}
+
+    return getSwitches(tree, {
+      modulePattern,
+      switchPattern
     })
-  ), [tree, options.modulePattern, options.switchPattern])
+  }, [tree, options.modulePattern, options.switchPattern])
 
   const spacing = useMemo(() => (
     options.choc
