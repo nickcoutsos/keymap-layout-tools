@@ -163,9 +163,14 @@ export function generateLayout (switches, options) {
       // > ANGLEs are stored in degrees.
       // Note: I don't know what specifically a text angle is and haven't seen
       // an example of it in any keyboard's kicad files.
-      key.r = -sw.angle
-      if (Math.abs(sw.angle) > 150 && Math.abs(sw.angle) < 210) {
-        key.r += Math.sign(sw.angle) * 180
+
+      // Try to orient keys to face "North". Switch rotations matter on the PCB
+      // but for presentational purposes we can rotate 90 degree increments to
+      // better align text with the horizontal axis. If I ever try to infer key
+      // size from the module/footprint text this will need to be revisited.
+      key.r = -(sw.angle % 90)
+      if (Math.abs(key.r) > 45) {
+        key.r -= 90 * Math.sign(key.r)
       }
     }
 
