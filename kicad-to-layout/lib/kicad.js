@@ -4,6 +4,7 @@
  */
 import { getLayoutBoundingRect } from 'keymap-layout-tools/lib/geometry.js'
 import * as modifiers from 'keymap-layout-tools/lib/modifiers.js'
+import { and, or, nameIs } from './util.js'
 import Parse from 's-expression'
 
 export const DEFAULT_MODULE_PATTERN = '.*'
@@ -80,10 +81,7 @@ export function parseKicadLayout (pcbFileContents, options) {
  * @returns {Array<ParsedSwitch>}
  */
 export function getSwitches (tree, options) {
-  const and = (...predicates) => value => predicates.every(predicate => predicate(value))
-  const or = (...predicates) => value => predicates.some(predicate => predicate(value))
 
-  const nameIs = name => value => Array.isArray(value) && value[0] === name
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
     nameIs('fp_text'),
