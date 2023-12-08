@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import { useEffect, useState, useMemo } from 'react'
 
 import { useKicadImporter } from './hooks.js'
@@ -12,7 +13,7 @@ export default function KicadImporter ({ onUpdate }) {
   const [contents, setContents] = useState('')
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
 
-  const { switches, layout: previewLayout } = useKicadImporter(contents, options)
+  const { switches, layout: previewLayout, components } = useKicadImporter(contents, options)
   const layoutWithSwitchInfo = useMemo(() => {
     return previewLayout && previewLayout.map((key, i) => ({
       ...key,
@@ -61,6 +62,7 @@ export default function KicadImporter ({ onUpdate }) {
           ⚠️ No switches could be parsed
         </div>
       )}
+      <SwitchCandidates components={components} />
       {previewLayout && (
         <Layout
           layout={layoutWithSwitchInfo}
@@ -70,6 +72,52 @@ export default function KicadImporter ({ onUpdate }) {
         />
       )}
     </>
+  )
+}
+
+function SwitchCandidates ({ components }) {
+  if (!components) {
+    return
+  }
+
+  const matched = components.filter(component => component.match).length
+  const total = components.length
+
+  return (
+    <details className={styles.components}>
+      <summary>Loaded components ({matched} / {total})</summary>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Reference</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {components.map((component, i) => (
+            <tr
+              key={i}
+              className={classNames({
+                [styles.componentMatch]: component.match
+              })}
+            >
+              <td>{component.name}</td>
+              <td>{component.ref}</td>
+              <td>{component.description || <em>(none)</em>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p>
+        <em>
+          Modules/footprints parsed from PCB. Pattern mismatches are indicated
+          by a strikethrough.
+        </em>
+      </p>
+    </details>
   )
 }
 

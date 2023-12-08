@@ -8,3 +8,46 @@
   line-height: 1.4em;
   text-align: center;
 }
+
+.components {
+  margin: 10px 0;
+}
+.components summary {
+  cursor: pointer;
+  padding: 5px;
+}
+.components summary:hover {
+  background-color: var(--key-bg-base);
+  border-radius: 5px;
+}
+
+.components table {
+  display: block;
+  overflow: auto;
+  max-height: 250px;
+  font-size: 90%;
+  border-collapse: collapse;
+}
+.components table td {
+  padding: 5px;
+}
+.components table thead {
+  position: sticky;
+  top: 0;
+  box-shadow: 0 5px 10px -5px rgba(0, 0, 0, 0.25);
+}
+.components table thead th {
+  text-align: left;
+  padding: 10px 5px;
+  background-color: var(--bg);
+}
+.components table tbody {
+  font-family: monospace;
+}
+.components table tbody tr:nth-child(even) {
+  background-color: var(--key-bg-base);
+}
+.components table tr:not(.componentMatch) td {
+  text-decoration: line-through;
+  color: rgba(var(--fg-rgb), 0.5);
+}

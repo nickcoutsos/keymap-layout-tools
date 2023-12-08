@@ -5,8 +5,11 @@ import {
   getSwitches,
   generateLayout,
   SPACING_CHOC,
-  SPACING_MX
+  SPACING_MX,
+  DEFAULT_MODULE_PATTERN,
+  DEFAULT_SWITCH_PATTERN
 } from 'kicad-to-layout'
+import { and, nameIs, or } from 'kicad-to-layout/lib/util.js'
 
 import {
   toOrigin,
@@ -20,10 +23,7 @@ export function useKicadImporter (contents, options) {
     contents && parsePcbTree(contents)
   ), [contents])
 
-  const switches = useMemo(() => {
-    if (!tree) {
-      return null
-    }
+  const patterns = useMemo(() => {
     let modulePattern
     let switchPattern
     try {
@@ -33,11 +33,46 @@ export function useKicadImporter (contents, options) {
       switchPattern = new RegExp(options.switchPattern)
     } catch {}
 
-    return getSwitches(tree, {
+    return {
       modulePattern,
       switchPattern
-    })
-  }, [tree, options.modulePattern, options.switchPattern])
+    }
+  }, [options])
+
+  const components = useMemo(() => {
+    if (!tree) {
+      return null
+    }
+
+    return tree
+      .filter(or(nameIs('module'), nameIs('footprint')))
+      .map(mod => {
+        const name = mod[1].constructor === String ? mod[1].toString() : undefined
+        const description = mod.find(nameIs('descr'))?.[1].toString()
+        const ref = mod.find(and(
+          nameIs('fp_text'),
+          node => node[1] === 'reference')
+        )?.[2].toString()
+
+        return {
+          name,
+          description,
+          ref,
+          match: (
+            name.match(patterns.modulePattern || DEFAULT_MODULE_PATTERN) &&
+            ref.match(patterns.switchPattern || DEFAULT_SWITCH_PATTERN)
+          )
+        }
+      })
+  }, [tree, patterns])
+
+  const switches = useMemo(() => {
+    if (!tree) {
+      return null
+    }
+
+    return getSwitches(tree, patterns)
+  }, [tree, patterns])
 
   const spacing = useMemo(() => (
     options.choc
@@ -66,7 +101,7 @@ export function useKicadImporter (contents, options) {
   }, [rawLayout, options.invert, options.mirror])
 
   return useMemo(
-    () => ({ switches, layout }),
-    [switches, layout]
+    () => ({ components, switches, layout }),
+    [components, switches, layout]
   )
 }
