@@ -83,7 +83,6 @@ export default function ParseOptions ({ options, onChange }) {
             name="switchPattern"
             type="text"
             value={options.switchPattern}
-            error={getRegexError(options.switchPattern)}
             onChange={handleChange}
           />
         </label> {options.switchPattern !== DEFAULT_SWITCH_PATTERN && (
