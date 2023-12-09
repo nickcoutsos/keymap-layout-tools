@@ -18,26 +18,26 @@ import {
   setFixedPrecision
 } from 'keymap-layout-tools/lib/modifiers.js'
 
-export function useKicadImporter (contents, options) {
+export function useKicadImporter (contents, rawOptions) {
   const tree = useMemo(() => (
     contents && parsePcbTree(contents)
   ), [contents])
 
-  const patterns = useMemo(() => {
-    let modulePattern
-    let switchPattern
+  const options = useMemo(() => {
+    let { modulePattern, switchPattern } = rawOptions
     try {
-      modulePattern = new RegExp(options.modulePattern)
+      modulePattern = new RegExp(modulePattern)
     } catch {}
     try {
-      switchPattern = new RegExp(options.switchPattern)
+      switchPattern = new RegExp(switchPattern)
     } catch {}
 
     return {
+      ...rawOptions,
       modulePattern,
       switchPattern
     }
-  }, [options])
+  }, [rawOptions])
 
   const components = useMemo(() => {
     if (!tree) {
@@ -59,20 +59,20 @@ export function useKicadImporter (contents, options) {
           description,
           ref,
           match: (
-            name.match(patterns.modulePattern || DEFAULT_MODULE_PATTERN) &&
-            ref.match(patterns.switchPattern || DEFAULT_SWITCH_PATTERN)
+            name.match(options.modulePattern || DEFAULT_MODULE_PATTERN) &&
+            ref.match(options.switchPattern || DEFAULT_SWITCH_PATTERN)
           )
         }
       })
-  }, [tree, patterns])
+  }, [tree, options])
 
   const switches = useMemo(() => {
     if (!tree) {
       return null
     }
 
-    return getSwitches(tree, patterns)
-  }, [tree, patterns])
+    return getSwitches(tree, options)
+  }, [tree, options])
 
   const spacing = useMemo(() => (
     options.choc

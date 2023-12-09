@@ -9,6 +9,7 @@ export const DEFAULT_OPTIONS = {
   invert: false,
   mirror: false,
   choc: false,
+  inferKeySize: true,
   modulePattern: DEFAULT_MODULE_PATTERN,
   switchPattern: DEFAULT_SWITCH_PATTERN
 }
@@ -30,37 +31,49 @@ export default function ParseOptions ({ options, onChange }) {
   return (
     <>
       <div>
-        <label>
+        <label title="Interpret parsed switch positions using choc spacing">
           <input
             name="choc"
             type="checkbox"
-            value={options.choc}
+            checked={options.choc}
             onChange={handleChange}
           /> Use Choc Spacing
         </label>
       </div>
 
       <div>
-        <label>
+        <label title="Flip the parsed PCB layout">
           <input
             name="invert"
             type="checkbox"
-            value={options.invert}
+            checked={options.invert}
             onChange={handleChange}
           /> Flip Horizontal
         </label>
       </div>
 
       <div>
-        <label>
+        <label title="Mirror parsed PCB layout for a half-keyboard">
           <input
             name="mirror"
             type="checkbox"
-            value={options.mirror}
+            checked={options.mirror}
             onChange={handleChange}
           /> Mirror Horizontal
         </label>
       </div>
+
+      <div>
+        <label title="Attempt to parse keycap size units from switch descriptions">
+          <input
+            name="inferKeySize"
+            type="checkbox"
+            checked={options.inferKeySize}
+            onChange={handleChange}
+          /> Infer Key Size
+        </label>
+      </div>
+
       <div>
         <label>
           Module pattern: <input

@@ -78,10 +78,10 @@ export function parseKicadLayout (pcbFileContents, options) {
  * @param {Object} options
  * @param {String|RegExp} options.modulePattern
  * @param {String|RegExp} options.switchPattern
+ * @param {boolean} options.inferKeySize
  * @returns {Array<ParsedSwitch>}
  */
 export function getSwitches (tree, options) {
-
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
     nameIs('fp_text'),
@@ -108,7 +108,12 @@ export function getSwitches (tree, options) {
           position: {
             x: Number(at[1]),
             y: Number(at[2])
-          }
+          },
+          size: (
+            options.inferKeySize
+              ? sizeFromModuleName(mod[1].toString())
+              : { u: 1, h: 1 }
+          )
         }
 
         if (!switches.some(prev => (
@@ -121,6 +126,13 @@ export function getSwitches (tree, options) {
 
       return switches
     }, [])
+}
+
+function sizeFromModuleName (name) {
+  return {
+    u: Number(name.match(/(\d+(\.\d+)?)u/i)?.[1]) || 1,
+    h: Number(name.match(/(\d+(\.\d+)?)h/i)?.[1]) || 1
+  }
 }
 
 /**
@@ -140,6 +152,7 @@ export function generateLayout (switches, options) {
   return switches.reduce((keys, sw, i) => {
     let x = Number(sw.position.x - min.x) / options.spacing.x
     let y = Number(sw.position.y - min.y) / options.spacing.y
+    let { u, h } = sw.size
     const prev = keys.at(i - 1)
 
     if (prev && x < prev.x) {
@@ -147,12 +160,21 @@ export function generateLayout (switches, options) {
       col = 0
     }
 
+    const angleFromVertical = sw.angle > 180 ? 360 - sw.angle : sw.angle
+    if (angleFromVertical > 45) {
+      [u, h] = [h, u]
+    }
+
     const key = {
       row,
       col: col++,
       r: 0,
-      x, y
+      x, y,
+      u, h
     }
+
+    if (u > 1) key.x -= (u - 1) / 2
+    if (h > 1) key.y -= (h - 1) / 2
 
     if (sw.angle) {
       // From the kicad file format docs:
@@ -177,8 +199,10 @@ export function generateLayout (switches, options) {
     // Kicad rotations are around the component's center point so we need to
     // make that explicit here.
     if (key.r) {
-      key.rx = key.x + .5
-      key.ry = key.y + .5
+      key.rx = key.x + key.u / 2
+      key.ry = key.y + key.h / 2
+    } else {
+      delete key.r
     }
 
     return [...keys, key]
