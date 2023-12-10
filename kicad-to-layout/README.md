@@ -32,6 +32,8 @@ Options:
                     braille dots.                     [boolean] [default: false]
   --choc            Interpret switch positioning based on kailh choc key spacing
                     (18.5mm x 17.5mm).                [boolean] [default: false]
+  --infer-key-size  Attempt to parse keycap dimensions from switch descriptions
+                                                      [boolean] [default: false]
   --module-pattern  PCRE regex pattern to apply to module/footprints being
                     considered for key switches. This can be used to be more
                     specific where power/reset switches otherwise follow the

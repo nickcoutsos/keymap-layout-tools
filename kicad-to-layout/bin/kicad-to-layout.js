@@ -32,6 +32,11 @@ const argumentParser = yargs()
     default: false,
     type: 'boolean'
   })
+  .option('infer-key-size', {
+    describe: 'Attempt to parse keycap dimensions from switch descriptions',
+    default: false,
+    type: 'boolean'
+  })
   .option('module-pattern', {
     describe: 'PRCE regex pattern to apply to module/footprints being considered for key switches. This can be used to be more specific where power/reset switches otherwise follow the same naming pattern as keys.',
     default: '.*',
@@ -47,6 +52,7 @@ async function main (args) {
     invert: parsed.invertX,
     mirror: parsed.mirrorX,
     modulePattern: parsed.modulePattern,
+    inferKeySize: parsed.inferKeySize,
     spacing: (
       parsed.choc
         ? { x: 18.5, y: 17.5 }
