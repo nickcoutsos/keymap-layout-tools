@@ -186,8 +186,7 @@ export function generateLayout (switches, options) {
 
       // Try to orient keys to face "North". Switch rotations matter on the PCB
       // but for presentational purposes we can rotate 90 degree increments to
-      // better align text with the horizontal axis. If I ever try to infer key
-      // size from the module/footprint text this will need to be revisited.
+      // better align text with the horizontal axis.
       key.r = -(sw.angle % 90)
       if (Math.abs(key.r) > 45) {
         key.r -= 90 * Math.sign(key.r)
@@ -203,7 +202,12 @@ export function generateLayout (switches, options) {
       key.ry = key.y + key.h / 2
     } else {
       delete key.r
+      delete key.rx
+      delete key.ry
     }
+
+    if (key.u === 1) delete key.u
+    if (key.h === 1) delete key.h
 
     return [...keys, key]
   }, [])

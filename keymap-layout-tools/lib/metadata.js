@@ -1,6 +1,6 @@
 import { formatJson, jsonTable } from './json-formatter.js'
 
-const keyOrder = ['row', 'col', 'x', 'y', 'w', 'h', 'r', 'rx', 'ry']
+const keyOrder = ['row', 'col', 'x', 'y', 'w', 'u', 'h', 'r', 'rx', 'ry']
 
 export function formatMetadata (metadata) {
   return formatJson(metadata, [{
