@@ -22,6 +22,11 @@ const argumentParser = yargs()
     default: false,
     type: 'boolean'
   })
+  .option('mirror-gap', {
+    describe: 'Width of blank space (in key units) to leave between keyboard halves',
+    default: 1,
+    type: 'integer'
+  })
   .option('preview', {
     describe: 'Render the generated layout in terminal using Unicode braille dots.',
     default: false,
@@ -51,6 +56,7 @@ async function main (args) {
   const options = {
     invert: parsed.invertX,
     mirror: parsed.mirrorX,
+    mirrorGap: parsed.mirrorGap,
     modulePattern: parsed.modulePattern,
     inferKeySize: parsed.inferKeySize,
     spacing: (

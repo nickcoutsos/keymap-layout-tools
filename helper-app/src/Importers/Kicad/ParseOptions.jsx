@@ -8,6 +8,7 @@ import {
 export const DEFAULT_OPTIONS = {
   invert: false,
   mirror: false,
+  mirrorGap: 1,
   choc: false,
   inferKeySize: true,
   modulePattern: DEFAULT_MODULE_PATTERN,
@@ -62,6 +63,30 @@ export default function ParseOptions ({ options, onChange }) {
           /> Mirror Horizontal
         </label>
       </div>
+
+      {options.mirror && (
+        <div>
+          <label
+            title="Width of blank space (in key units) to leave between keyboard halves"
+            style={{ marginLeft: '25px' }}
+          >
+            Mirror gap <input
+              style={{ verticalAlign: 'middle' }}
+              name="mirrorGap"
+              type="range"
+              min="0"
+              max="5"
+              step="1"
+              value={options.mirrorGap}
+              checked={options.mirrorGap}
+              onChange={event => updateOption(
+                'mirrorGap',
+                Number(event.target.value)
+              )}
+            />
+          </label>
+        </div>
+      )}
 
       <div>
         <label title="Attempt to parse keycap size units from switch descriptions">

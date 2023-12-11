@@ -60,7 +60,7 @@ export function parseKicadLayout (pcbFileContents, options) {
     layout = modifiers.flip(layout)
   }
   if (options.mirror) {
-    layout = modifiers.mirror(layout, { gap: 2 })
+    layout = modifiers.mirror(layout, { gap: options.mirrorGap })
   }
 
   const bbox = getLayoutBoundingRect(layout, { keySize: 1, padding: 0 })

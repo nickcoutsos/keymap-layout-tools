@@ -94,11 +94,14 @@ export function useKicadImporter (contents, rawOptions) {
       layout = flip(layout, { referenceOriginal: true })
     }
     if (options.mirror) {
-      layout = mirror(layout, { referenceOriginal: true, gap: 2 })
+      layout = mirror(layout, {
+        referenceOriginal: true,
+        gap: options.mirrorGap
+      })
     }
 
     return setFixedPrecision(toOrigin(layout))
-  }, [rawLayout, options.invert, options.mirror])
+  }, [rawLayout, options.invert, options.mirror, options.mirrorGap])
 
   return useMemo(
     () => ({ components, switches, layout }),
