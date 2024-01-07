@@ -9,10 +9,12 @@ export const DEFAULT_OPTIONS = {
   invert: false,
   mirror: false,
   mirrorGap: 1,
-  choc: false,
   inferKeySize: true,
   modulePattern: DEFAULT_MODULE_PATTERN,
-  switchPattern: DEFAULT_SWITCH_PATTERN
+  switchPattern: DEFAULT_SWITCH_PATTERN,
+  switchSpacing: 'mx',
+  customSpacingX: 19,
+  customSpacingY: 19
 }
 
 export default function ParseOptions ({ options, onChange }) {
@@ -22,26 +24,19 @@ export default function ParseOptions ({ options, onChange }) {
 
   const handleChange = useCallback(event => {
     const name = event.target.name
-    const value = event.target.type === 'checkbox'
+    let value = event.target.type === 'checkbox'
       ? event.target.checked
       : event.target.value
+
+    if (event.target.type === 'number') {
+      value = Number(value)
+    }
 
     updateOption(name, value)
   }, [updateOption])
 
   return (
     <>
-      <div>
-        <label title="Interpret parsed switch positions using choc spacing">
-          <input
-            name="choc"
-            type="checkbox"
-            checked={options.choc}
-            onChange={handleChange}
-          /> Use Choc Spacing
-        </label>
-      </div>
-
       <div>
         <label title="Flip the parsed PCB layout">
           <input
@@ -115,6 +110,7 @@ export default function ParseOptions ({ options, onChange }) {
           />
         )} <Error value={getRegexError(options.modulePattern)} />
       </div>
+
       <div>
         <label>
           Switch pattern: <input
@@ -130,6 +126,66 @@ export default function ParseOptions ({ options, onChange }) {
             onUpdate={updateOption}
           />
         )} <Error value={getRegexError(options.switchPattern)} />
+      </div>
+
+      <div>
+        <label>
+          Switch spacing:
+        </label>
+        <ul>
+          <li>
+            <label>
+              <input
+                name="switchSpacing"
+                type="radio"
+                value="choc"
+                checked={options.switchSpacing === 'choc'}
+                onChange={handleChange}
+              /> Choc (<em>18mm</em> ⨯ <em>17mm</em>)
+            </label>
+          </li>
+          <li>
+            <label>
+              <input
+                name="switchSpacing"
+                type="radio"
+                value="mx"
+                checked={options.switchSpacing === 'mx'}
+                onChange={handleChange}
+              /> MX (<em>19mm</em> ⨯ <em>19mm</em>)
+            </label>
+          </li>
+          <li>
+            <label>
+              <input
+                name="switchSpacing"
+                type="radio"
+                value="custom"
+                checked={options.switchSpacing === 'custom'}
+                onChange={handleChange}
+              /> Custom...
+            </label>
+            <fieldset disabled={options.switchSpacing !== 'custom'}>
+              <input
+                name="customSpacingX"
+                type="number"
+                min={0.1}
+                title="Horizontal spacing in millimeters"
+                style={{ width: '50px' }}
+                value={options.customSpacingX}
+                onChange={handleChange}
+              /> mm ⨯ <input
+                name="customSpacingY"
+                type="number"
+                min={0.1}
+                title="Vertical spacing in millimeters"
+                style={{ width: '50px' }}
+                value={options.customSpacingY}
+                onChange={handleChange}
+              /> mm
+            </fieldset>
+          </li>
+        </ul>
       </div>
     </>
   )

@@ -74,11 +74,25 @@ export function useKicadImporter (contents, rawOptions) {
     return getSwitches(tree, options)
   }, [tree, options])
 
-  const spacing = useMemo(() => (
-    options.choc
-      ? SPACING_CHOC
-      : SPACING_MX
-  ), [options.choc])
+  const spacing = useMemo(() => {
+    switch (options.switchSpacing) {
+      case 'choc':
+        return SPACING_CHOC
+      case 'mx':
+        return SPACING_MX
+      case 'custom':
+        return {
+          x: options.customSpacingX,
+          y: options.customSpacingY
+        }
+      default:
+        return SPACING_MX
+    }
+  }, [
+    options.switchSpacing,
+    options.customSpacingX,
+    options.customSpacingY
+  ])
 
   const rawLayout = useMemo(() => (
     switches && generateLayout(switches, { spacing })
