@@ -1,14 +1,13 @@
 import { parseLayout, parseLayoutFromMatrix } from 'keymap-layout-tools/lib/parse.js'
 import { findNodesWithCompatible, getPropertyValues } from './tree.js'
 
-export default function parseLayouts (parser, dts) {
-  const tree = parser.parse(dts)
+export default function parseLayouts (tree) {
   const matrixTransformNodes = findNodesWithCompatible(tree, 'zmk,matrix-transform')
   const scanMatrixNodes = findNodesWithCompatible(tree, /^"zmk,kscan-/)
 
   const transformLayouts = parseMatrixTransformLayouts(matrixTransformNodes).filter(value => !!value)
   const scanMatrixLayouts = parseScanMatrixLayouts(scanMatrixNodes).filter(value => !!value)
-  tree.delete()
+
   return (
     transformLayouts.length
       ? transformLayouts

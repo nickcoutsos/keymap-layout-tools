@@ -38,6 +38,24 @@ export function getPropertyValues (node, property) {
   return propertyNode && getNodeChildrenByFieldName(propertyNode, 'value')
 }
 
+export function findLabeledItem (tree, name) {
+  let node = searchTree(tree, node => (
+    node.type === 'labeled_item' &&
+    node.children[0].type === 'identifier' &&
+    node.children[0].text === name
+  ), { single: true })
+
+  if (!node) {
+    return null
+  }
+
+  do {
+    node = node.childForFieldName('item')
+  } while (node.type === 'labeled_item')
+
+  return node
+}
+
 export function getNodeChildrenByFieldName (node, fieldName) {
   const children = []
 

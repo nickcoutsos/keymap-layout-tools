@@ -1,37 +1,22 @@
 import { useState, useMemo, useEffect } from 'react'
 
 import { useParser } from './devicetree.js'
-import parseLayouts from './parse-layouts.js'
 
 import FileSelect from '../../Common/FileSelect.jsx'
 import LayoutPreview from '../../Common/LayoutPreview.jsx'
+import parseMetadata from './parse-metadata.js'
 
 export default function DtsImporter ({ onUpdate }) {
   const [value, setValue] = useState('')
   const parser = useParser()
 
-  const layouts = useMemo(() => {
-    if (!value || !parser) {
-      return []
-    }
-
-    return parseLayouts(parser, value)
-  }, [value, parser])
-
   const metadata = useMemo(() => {
-    if (!layouts?.length) {
+    if (!value || !parser) {
       return null
     }
 
-    return {
-      layouts: layouts.reduce((acc, result) => ({
-        ...acc,
-        [result.label]: {
-          layout: result.layout
-        }
-      }), {})
-    }
-  }, [layouts])
+    return parseMetadata(parser, value)
+  }, [value, parser])
 
   useEffect(() => {
     onUpdate(metadata)
