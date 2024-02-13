@@ -13,9 +13,9 @@ export default function KicadImporter ({ onUpdate }) {
   const [contents, setContents] = useState('')
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
 
-  const { switches, layout: previewLayout, components } = useKicadImporter(contents, options)
+  const { switches, layout, layoutWithMetadata, components } = useKicadImporter(contents, options)
   const layoutWithSwitchInfo = useMemo(() => {
-    return previewLayout && previewLayout.map((key, i) => ({
+    return layoutWithMetadata && layoutWithMetadata.map((key, i) => ({
       ...key,
       _switch: (
         '_original' in key
@@ -23,13 +23,7 @@ export default function KicadImporter ({ onUpdate }) {
           : switches[i]
       )
     }))
-  }, [previewLayout, switches])
-
-  const layout = useMemo(() => previewLayout && previewLayout.map(key => {
-    const cleaned = { ...key }
-    delete cleaned._original
-    return cleaned
-  }), [previewLayout])
+  }, [layoutWithMetadata, switches])
 
   useEffect(() => {
     onUpdate({
@@ -57,13 +51,13 @@ export default function KicadImporter ({ onUpdate }) {
       </fieldset>
 
       <h3>3. Preview</h3>
-      {previewLayout && previewLayout.length === 0 && (
+      {layout && layout.length === 0 && (
         <div className={styles.warning}>
           ⚠️ No switches could be parsed
         </div>
       )}
       <SwitchCandidates components={components} />
-      {previewLayout && (
+      {layout && (
         <Layout
           layout={layoutWithSwitchInfo}
           scale={0.5}

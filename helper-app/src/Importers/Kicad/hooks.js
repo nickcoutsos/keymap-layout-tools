@@ -98,7 +98,7 @@ export function useKicadImporter (contents, rawOptions) {
     switches && generateLayout(switches, { spacing })
   ), [switches, spacing])
 
-  const layout = useMemo(() => {
+  const layoutWithMetadata = useMemo(() => {
     if (!rawLayout) {
       return null
     }
@@ -117,8 +117,21 @@ export function useKicadImporter (contents, rawOptions) {
     return setFixedPrecision(toOrigin(layout))
   }, [rawLayout, options.invert, options.mirror, options.mirrorGap])
 
+  const layout = useMemo(() => {
+    if (!layoutWithMetadata) {
+      return null
+    }
+
+    return layoutWithMetadata.map(key => {
+      const cleaned = { ...key }
+      delete cleaned._original
+      delete cleaned._duplicate
+      return cleaned
+    })
+  }, [layoutWithMetadata])
+
   return useMemo(
-    () => ({ components, switches, layout }),
-    [components, switches, layout]
+    () => ({ components, switches, layout, layoutWithMetadata }),
+    [components, switches, layout, layoutWithMetadata]
   )
 }
