@@ -84,9 +84,9 @@ export function parseKicadLayout (pcbFileContents, options) {
 export function getSwitches (tree, options) {
   const positionMatcher = nameIs('at')
   const switchTextMatcher = and(
-    nameIs('fp_text'),
+    or(nameIs('fp_text'), nameIs('property')),
     node => (
-      node[1] === 'reference' &&
+      node[1].toLowerCase() === 'reference' &&
       node[2].match(options.switchPattern || DEFAULT_SWITCH_PATTERN)
     )
   )

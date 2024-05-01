@@ -50,8 +50,8 @@ export function useKicadImporter (contents, rawOptions) {
         const name = mod[1].constructor === String ? mod[1].toString() : undefined
         const description = mod.find(nameIs('descr'))?.[1].toString()
         const ref = mod.find(and(
-          nameIs('fp_text'),
-          node => node[1] === 'reference')
+          or(nameIs('fp_text'), nameIs('property')),
+          node => node[1].toLowerCase() === 'reference')
         )?.[2].toString()
 
         return {
