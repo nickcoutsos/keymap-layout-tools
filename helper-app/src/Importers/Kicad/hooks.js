@@ -27,10 +27,14 @@ export function useKicadImporter (contents, rawOptions) {
     let { modulePattern, switchPattern } = rawOptions
     try {
       modulePattern = new RegExp(modulePattern)
-    } catch {}
+    } catch {
+      modulePattern = ''
+    }
     try {
       switchPattern = new RegExp(switchPattern)
-    } catch {}
+    } catch {
+      switchPattern = ''
+    }
 
     return {
       ...rawOptions,

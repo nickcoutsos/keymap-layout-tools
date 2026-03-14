@@ -219,6 +219,7 @@ function Error ({ value }) {
 
   return (
     <span style={{
+      display: 'block',
       backgroundColor: 'rgba(255, 0, 0, 0.2)',
       border: '2px solid crimson',
       borderRadius: '4px',
